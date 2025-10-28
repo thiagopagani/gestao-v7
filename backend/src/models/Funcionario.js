@@ -16,16 +16,12 @@ const Funcionario = sequelize.define('funcionario', {
     allowNull: false,
     unique: true,
   },
-  funcao: {
+  cargo: {
     type: DataTypes.STRING,
-    allowNull: true,
-  },
-  telefone: {
-    type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
   },
   tipo: {
-    type: DataTypes.ENUM('Treinamento', 'Autônomo'),
+    type: DataTypes.ENUM('Treinamento', 'Autonomo'),
     allowNull: false,
     defaultValue: 'Treinamento',
   },
