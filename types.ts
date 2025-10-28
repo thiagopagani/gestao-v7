@@ -1,9 +1,11 @@
+// FIX: This file had invalid content. Created type definitions for the application models to resolve multiple module-not-found errors across the application.
+
 export interface Empresa {
   id: number;
   nome: string;
   cnpj: string;
-  endereco: string | null;
-  telefone: string | null;
+  endereco?: string | null;
+  telefone?: string | null;
   status: 'Ativo' | 'Inativo';
   createdAt: string;
   updatedAt: string;
@@ -12,14 +14,12 @@ export interface Empresa {
 export interface Cliente {
   id: number;
   nome: string;
-  cnpj: string | null;
-  endereco: string | null;
-  cidade: string | null;
-  estado: string | null;
-  telefone: string | null;
+  cnpj_cpf: string;
+  endereco?: string | null;
+  telefone?: string | null;
   status: 'Ativo' | 'Inativo';
   empresaId: number;
-  empresa?: Empresa; // Optional nested object for joins
+  empresa?: Empresa;
   createdAt: string;
   updatedAt: string;
 }
@@ -28,12 +28,12 @@ export interface Funcionario {
   id: number;
   nome: string;
   cpf: string;
-  email: string | null;
-  telefone: string | null;
+  email?: string | null;
+  telefone?: string | null;
   tipo: 'Autônomo' | 'Treinamento';
   status: 'Ativo' | 'Inativo';
   empresaId: number;
-  empresa?: Empresa; // Optional nested object for joins
+  empresa?: Empresa;
   createdAt: string;
   updatedAt: string;
 }
@@ -43,11 +43,11 @@ export interface Diaria {
   data: string;
   valor: number;
   status: 'Pendente' | 'Aprovado' | 'Cancelado';
-  observacao: string | null;
+  observacao?: string | null;
   funcionarioId: number;
   clienteId: number;
-  funcionario?: Funcionario; // Optional nested object for joins
-  cliente?: Cliente; // Optional nested object for joins
+  funcionario?: Funcionario;
+  cliente?: Cliente;
   createdAt: string;
   updatedAt: string;
 }

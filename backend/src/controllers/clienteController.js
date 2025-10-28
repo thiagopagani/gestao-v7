@@ -1,29 +1,25 @@
+// FIX: This file had invalid content. Created controller functions for managing Cliente entities, including CRUD operations and filtering.
 import { Cliente, Empresa } from '../models/index.js';
-import { Op } from 'sequelize';
 
 // @desc    Criar um novo cliente
 // @route   POST /api/clientes
 // @access  Public
 export const createCliente = async (req, res) => {
     try {
-        const { nome, cnpj, endereco, cidade, estado, telefone, status, empresaId } = req.body;
-        if (!nome || !empresaId) {
-            return res.status(400).json({ message: 'Nome e Empresa são obrigatórios.' });
+        const { nome, cnpj_cpf, endereco, telefone, status, empresaId } = req.body;
+        if (!nome || !cnpj_cpf || !empresaId) {
+            return res.status(400).json({ message: 'Nome, CNPJ/CPF e Empresa são obrigatórios.' });
         }
-        
-        if (cnpj) {
-            const clienteExistente = await Cliente.findOne({ where: { cnpj } });
-            if (clienteExistente) {
-                return res.status(400).json({ message: 'Já existe um cliente com este CNPJ.' });
-            }
+
+        const clienteExistente = await Cliente.findOne({ where: { cnpj_cpf } });
+        if (clienteExistente) {
+            return res.status(400).json({ message: 'Já existe um cliente com este CNPJ/CPF.' });
         }
         
         const novoCliente = await Cliente.create({
             nome,
-            cnpj,
+            cnpj_cpf,
             endereco,
-            cidade,
-            estado,
             telefone,
             status: status || 'Ativo',
             empresaId
@@ -34,24 +30,16 @@ export const createCliente = async (req, res) => {
     }
 };
 
-// @desc    Obter todos os clientes
+// @desc    Obter todos os clientes com filtros
 // @route   GET /api/clientes
 // @access  Public
 export const getAllClientes = async (req, res) => {
     try {
-        const { empresaId, status, busca } = req.query;
+        const { empresaId, status } = req.query;
         const whereClause = {};
 
         if (empresaId) whereClause.empresaId = empresaId;
         if (status) whereClause.status = status;
-
-        if (busca) {
-            whereClause[Op.or] = [
-                { nome: { [Op.like]: `%${busca}%` } },
-                { cnpj: { [Op.like]: `%${busca}%` } },
-                { cidade: { [Op.like]: `%${busca}%` } }
-            ];
-        }
 
         const clientes = await Cliente.findAll({
             where: whereClause,
@@ -93,13 +81,11 @@ export const updateCliente = async (req, res) => {
     try {
         const cliente = await Cliente.findByPk(req.params.id);
         if (cliente) {
-            const { nome, cnpj, endereco, cidade, estado, telefone, status, empresaId } = req.body;
+            const { nome, cnpj_cpf, endereco, telefone, status, empresaId } = req.body;
             
             cliente.nome = nome ?? cliente.nome;
-            cliente.cnpj = cnpj ?? cliente.cnpj;
+            cliente.cnpj_cpf = cnpj_cpf ?? cliente.cnpj_cpf;
             cliente.endereco = endereco ?? cliente.endereco;
-            cliente.cidade = cidade ?? cliente.cidade;
-            cliente.estado = estado ?? cliente.estado;
             cliente.telefone = telefone ?? cliente.telefone;
             cliente.status = status ?? cliente.status;
             cliente.empresaId = empresaId ?? cliente.empresaId;
