@@ -143,9 +143,7 @@ const Empresas: React.FC = () => {
         };
     }
   };
-
-  // FIX: getModalProps can return an invalid object for the modal.
-  // We now get the props first and only render the modal if the props are valid.
+  
   const modalProps = getModalProps();
 
   return (
@@ -191,6 +189,8 @@ const Empresas: React.FC = () => {
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {loading ? (
                     <tr><td colSpan={5} className="text-center py-4">Carregando...</td></tr>
+                  ) : empresas.length === 0 ? (
+                     <tr><td colSpan={5} className="text-center py-4 text-gray-500">Nenhuma empresa encontrada.</td></tr>
                   ) : empresas.map((empresa) => (
                     <tr key={empresa.id}>
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{empresa.nome}</td>

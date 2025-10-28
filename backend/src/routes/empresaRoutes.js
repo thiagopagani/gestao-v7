@@ -18,9 +18,9 @@ router.route('/')
 router.route('/:id')
     .get(getEmpresaById)
     .put(updateEmpresa)
-    .delete(deleteEmpresa);
+    .delete(deleteEmpresa); // Rota para inativar (soft delete)
 
-router.delete('/:id/force', forceDeleteEmpresa);
-router.put('/:id/restore', restoreEmpresa);
+router.delete('/:id/force', forceDeleteEmpresa); // Rota para exclusão permanente
+router.put('/:id/restore', restoreEmpresa); // Rota para reativar
 
 export default router;
