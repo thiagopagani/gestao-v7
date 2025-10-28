@@ -24,6 +24,14 @@ const Cliente = sequelize.define('Cliente', {
     allowNull: false,
     defaultValue: 'Ativo',
   },
+  empresaId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'empresas',
+      key: 'id'
+    }
+  }
 }, {
   tableName: 'clientes',
   timestamps: true,

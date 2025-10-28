@@ -1,4 +1,4 @@
-// FIX: This file had invalid content. Created the Sequelize model for Funcionario.
+
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
@@ -34,6 +34,14 @@ const Funcionario = sequelize.define('Funcionario', {
     allowNull: false,
     defaultValue: 'Ativo',
   },
+  empresaId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+        model: 'empresas',
+        key: 'id'
+    }
+  }
 }, {
   tableName: 'funcionarios',
   timestamps: true,
