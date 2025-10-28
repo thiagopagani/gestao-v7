@@ -1,8 +1,10 @@
 export interface Empresa {
   id: number;
   nome: string;
-  cnpj: string;
+  cnpj: string | null;
   endereco: string | null;
+  cidade: string | null;
+  estado: string | null;
   telefone: string | null;
   status: 'Ativo' | 'Inativo';
   createdAt?: string;
@@ -51,7 +53,7 @@ export interface Diaria {
   cliente?: {
     nome: string;
     empresa?: {
-      nome: string;
+        nome: string;
     }
   };
   createdAt?: string;

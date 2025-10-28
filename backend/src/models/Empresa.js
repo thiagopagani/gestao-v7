@@ -13,10 +13,18 @@ const Empresa = sequelize.define('empresa', {
   },
   cnpj: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
     unique: true,
   },
   endereco: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  cidade: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  estado: {
     type: DataTypes.STRING,
     allowNull: true,
   },
