@@ -1,45 +1,45 @@
 import { Diaria, Cliente } from '../models/index.js';
-import { Op } from 'sequelize';
 import sequelize from '../config/database.js';
+import { Op } from 'sequelize';
 
 // Gerar relatório de resumo de diárias
 export const getRelatorioDiarias = async (req, res) => {
-    try {
-        const { empresaId, clienteId, status, dataInicio, dataFim } = req.query;
-        const where = {};
-        const includeWhere = {};
-        
-        if (clienteId) where.clienteId = clienteId;
-        if (status) where.status = status;
-        if (dataInicio && dataFim) {
-            where.data = { [Op.between]: [dataInicio, dataFim] };
-        }
-        
-        if (empresaId) includeWhere.empresaId = empresaId;
+  try {
+    const { empresaId, clienteId, status, dataInicio, dataFim } = req.query;
+    const where = {};
+    const clienteWhere = {};
 
-        const result = await Diaria.findOne({
-            attributes: [
-                [sequelize.fn('SUM', sequelize.col('valor')), 'totalValor'],
-                [sequelize.fn('COUNT', sequelize.col('id')), 'totalDiarias'],
-            ],
-            where,
-            include: [{
-                model: Cliente,
-                as: 'cliente',
-                attributes: [],
-                where: Object.keys(includeWhere).length ? includeWhere : undefined,
-            }],
-            raw: true,
-        });
-
-        // Se não houver resultado, SUM e COUNT podem retornar null
-        const summary = {
-            totalValor: parseFloat(result.totalValor) || 0,
-            totalDiarias: parseInt(result.totalDiarias, 10) || 0,
-        };
-        
-        res.status(200).json(summary);
-    } catch (error) {
-        res.status(500).json({ message: 'Erro ao gerar relatório', error: error.message });
+    if (empresaId) clienteWhere.empresaId = empresaId;
+    if (clienteId) where.clienteId = clienteId;
+    if (status) where.status = status;
+    if (dataInicio && dataFim) {
+      where.data = { [Op.between]: [dataInicio, dataFim] };
+    } else if (dataInicio) {
+      where.data = { [Op.gte]: dataInicio };
+    } else if (dataFim) {
+      where.data = { [Op.lte]: dataFim };
     }
+    
+    const includeCliente = Object.keys(clienteWhere).length > 0 
+      ? [{ model: Cliente, as: 'cliente', where: clienteWhere, attributes: [] }]
+      : [];
+      
+    const summary = await Diaria.findOne({
+      attributes: [
+        [sequelize.fn('SUM', sequelize.col('valor')), 'totalValor'],
+        [sequelize.fn('COUNT', sequelize.col('id')), 'totalDiarias'],
+      ],
+      where,
+      include: includeCliente,
+    });
+    
+    const result = {
+        totalValor: parseFloat(summary.getDataValue('totalValor')) || 0,
+        totalDiarias: parseInt(summary.getDataValue('totalDiarias'), 10) || 0
+    };
+
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao gerar relatório', error: error.message });
+  }
 };
