@@ -1,2 +1,3 @@
-// FIX: This file had invalid content. Replaced with a placeholder as it is not currently used in the application.
-// This file can be used to configure a mail transport service like Nodemailer in the future.
+// Arquivo de configuração para o Nodemailer (serviço de e-mail).
+// Pode ser configurado no futuro. Por enquanto, exporta um objeto nulo para garantir que seja um módulo válido.
+export default null;
