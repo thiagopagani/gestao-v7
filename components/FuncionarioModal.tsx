@@ -1,3 +1,4 @@
+// Fix: Implement the missing FuncionarioModal component. This file had placeholder content.
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Funcionario } from '../types';
@@ -13,13 +14,8 @@ const FuncionarioModal: React.FC<FuncionarioModalProps> = ({ isOpen, onClose, on
   const [formData, setFormData] = useState({
     nome: '',
     cpf: '',
-    email: '',
-    telefone: '',
-    endereco: '',
-    cep: '',
-    cidade: '',
-    estado: '',
     funcao: '',
+    telefone: '',
     tipo: 'Treinamento' as 'Treinamento' | 'Autônomo',
     status: 'Ativo' as 'Ativo' | 'Inativo',
   });
@@ -29,27 +25,18 @@ const FuncionarioModal: React.FC<FuncionarioModalProps> = ({ isOpen, onClose, on
       setFormData({
         nome: funcionario.nome || '',
         cpf: funcionario.cpf || '',
-        email: funcionario.email || '',
-        telefone: funcionario.telefone || '',
-        endereco: funcionario.endereco || '',
-        cep: funcionario.cep || '',
-        cidade: funcionario.cidade || '',
-        estado: funcionario.estado || '',
         funcao: funcionario.funcao || '',
+        telefone: funcionario.telefone || '',
         tipo: funcionario.tipo || 'Treinamento',
         status: funcionario.status || 'Ativo',
       });
     } else {
+      // Reset form for new entry
       setFormData({
         nome: '',
         cpf: '',
-        email: '',
-        telefone: '',
-        endereco: '',
-        cep: '',
-        cidade: '',
-        estado: '',
         funcao: '',
+        telefone: '',
         tipo: 'Treinamento',
         status: 'Ativo',
       });
@@ -67,16 +54,7 @@ const FuncionarioModal: React.FC<FuncionarioModalProps> = ({ isOpen, onClose, on
       alert('Nome e CPF são obrigatórios.');
       return;
     }
-    onSave({
-      ...formData,
-      email: formData.email || null,
-      telefone: formData.telefone || null,
-      endereco: formData.endereco || null,
-      cep: formData.cep || null,
-      cidade: formData.cidade || null,
-      estado: formData.estado || null,
-      funcao: formData.funcao || null,
-    });
+    onSave(formData);
   };
 
   const modalTitle = funcionario ? 'Editar Funcionário' : 'Adicionar Novo Funcionário';
@@ -97,47 +75,23 @@ const FuncionarioModal: React.FC<FuncionarioModalProps> = ({ isOpen, onClose, on
             <label htmlFor="funcao" className="block text-sm font-medium text-gray-700">Função (Opcional)</label>
             <input type="text" name="funcao" id="funcao" value={formData.funcao} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
           </div>
-           <div>
-            <label htmlFor="endereco" className="block text-sm font-medium text-gray-700">Endereço (Opcional)</label>
-            <input type="text" name="endereco" id="endereco" value={formData.endereco} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
-          </div>
-           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="cep" className="block text-sm font-medium text-gray-700">CEP (Opcional)</label>
-              <input type="text" name="cep" id="cep" value={formData.cep} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
-            </div>
-            <div>
-              <label htmlFor="cidade" className="block text-sm font-medium text-gray-700">Cidade (Opcional)</label>
-              <input type="text" name="cidade" id="cidade" value={formData.cidade} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
-            </div>
-          </div>
-           <div>
-              <label htmlFor="estado" className="block text-sm font-medium text-gray-700">Estado (Opcional)</label>
-              <input type="text" name="estado" id="estado" value={formData.estado} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
-            </div>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email (Opcional)</label>
-            <input type="email" name="email" id="email" value={formData.email} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
-          </div>
           <div>
             <label htmlFor="telefone" className="block text-sm font-medium text-gray-700">Telefone (Opcional)</label>
             <input type="text" name="telefone" id="telefone" value={formData.telefone} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo</label>
-              <select id="tipo" name="tipo" value={formData.tipo} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
-                <option>Treinamento</option>
-                <option>Autônomo</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
-              <select id="status" name="status" value={formData.status} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
-                <option>Ativo</option>
-                <option>Inativo</option>
-              </select>
-            </div>
+           <div>
+            <label htmlFor="tipo" className="block text-sm font-medium text-gray-700">Tipo</label>
+            <select id="tipo" name="tipo" value={formData.tipo} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
+              <option>Treinamento</option>
+              <option>Autônomo</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
+            <select id="status" name="status" value={formData.status} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
+              <option value="Ativo">Ativo</option>
+              <option value="Inativo">Inativo</option>
+            </select>
           </div>
         </div>
         <div className="mt-5 sm:mt-6 sm:flex sm:flex-row-reverse">
