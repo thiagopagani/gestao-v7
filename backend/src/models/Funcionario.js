@@ -26,6 +26,21 @@ const Funcionario = sequelize.define('funcionario', {
   telefone: {
     type: DataTypes.STRING,
   },
+  endereco: {
+    type: DataTypes.STRING,
+  },
+  cep: {
+    type: DataTypes.STRING,
+  },
+  cidade: {
+    type: DataTypes.STRING,
+  },
+  estado: {
+    type: DataTypes.STRING,
+  },
+  funcao: {
+    type: DataTypes.STRING,
+  },
   tipo: {
     type: DataTypes.ENUM('Autônomo', 'Treinamento'),
     defaultValue: 'Treinamento',
@@ -33,14 +48,6 @@ const Funcionario = sequelize.define('funcionario', {
   status: {
     type: DataTypes.ENUM('Ativo', 'Inativo'),
     defaultValue: 'Ativo',
-  },
-  empresaId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'empresas',
-      key: 'id',
-    },
   },
 }, {
   tableName: 'funcionarios',

@@ -8,10 +8,6 @@ import User from './User.js';
 Empresa.hasMany(Cliente, { foreignKey: 'empresaId', as: 'clientes' });
 Cliente.belongsTo(Empresa, { foreignKey: 'empresaId', as: 'empresa' });
 
-// Relação: Empresa pode ter muitos Funcionários
-Empresa.hasMany(Funcionario, { foreignKey: 'empresaId', as: 'funcionarios' });
-Funcionario.belongsTo(Empresa, { foreignKey: 'empresaId', as: 'empresa' });
-
 // Relação: Funcionário pode ter muitas Diárias
 Funcionario.hasMany(Diaria, { foreignKey: 'funcionarioId', as: 'diarias' });
 Diaria.belongsTo(Funcionario, { foreignKey: 'funcionarioId', as: 'funcionario' });

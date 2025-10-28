@@ -1,4 +1,4 @@
-import { Funcionario, Empresa } from '../models/index.js';
+import { Funcionario } from '../models/index.js';
 
 // Criar um novo funcionário
 export const createFuncionario = async (req, res) => {
@@ -16,15 +16,14 @@ export const createFuncionario = async (req, res) => {
 // Obter todos os funcionários com filtros
 export const getAllFuncionarios = async (req, res) => {
     try {
-        const { empresaId, status, tipo } = req.query;
+        const { status, tipo } = req.query;
         const where = {};
-        if (empresaId) where.empresaId = empresaId;
         if (status) where.status = status;
         if (tipo) where.tipo = tipo;
 
         const funcionarios = await Funcionario.findAll({
             where,
-            include: [{ model: Empresa, as: 'empresa', attributes: ['nome'] }]
+            order: [['nome', 'ASC']]
         });
         res.status(200).json(funcionarios);
     } catch (error) {

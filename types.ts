@@ -32,12 +32,13 @@ export interface Funcionario {
   cpf: string;
   email: string | null;
   telefone: string | null;
+  endereco: string | null;
+  cep: string | null;
+  cidade: string | null;
+  estado: string | null;
+  funcao: string | null;
   tipo: 'Autônomo' | 'Treinamento';
   status: 'Ativo' | 'Inativo';
-  empresaId: number;
-  empresa?: {
-    nome: string;
-  };
   createdAt: string;
   updatedAt: string;
 }

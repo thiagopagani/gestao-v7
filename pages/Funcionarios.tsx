@@ -3,7 +3,7 @@ import { PencilIcon, TrashIcon, ArrowPathIcon } from '@heroicons/react/24/outlin
 import FuncionarioModal from '../components/FuncionarioModal';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import ConfirmConvertModal from '../components/ConfirmConvertModal';
-import { Funcionario, Empresa } from '../types';
+import { Funcionario } from '../types';
 
 const API_URL = '/api/funcionarios';
 
@@ -19,16 +19,13 @@ const Funcionarios: React.FC = () => {
   const [selectedFuncionario, setSelectedFuncionario] = useState<Funcionario | null>(null);
 
   // Filters state
-  const [filtroEmpresa, setFiltroEmpresa] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('Ativo');
   const [filtroTipo, setFiltroTipo] = useState('');
-  const [empresasFiltro, setEmpresasFiltro] = useState<Empresa[]>([]);
 
   const fetchFuncionarios = useCallback(async () => {
     setLoading(true);
     setError(null);
     const params = new URLSearchParams();
-    if (filtroEmpresa) params.append('empresaId', filtroEmpresa);
     if (filtroStatus) params.append('status', filtroStatus);
     if (filtroTipo) params.append('tipo', filtroTipo);
     const query = params.toString();
@@ -45,26 +42,12 @@ const Funcionarios: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [filtroEmpresa, filtroStatus, filtroTipo]);
+  }, [filtroStatus, filtroTipo]);
 
   useEffect(() => {
     fetchFuncionarios();
   }, [fetchFuncionarios]);
 
-  useEffect(() => {
-    const fetchEmpresas = async () => {
-      try {
-        const response = await fetch('/api/empresas?status=Ativo');
-        if (response.ok) {
-          setEmpresasFiltro(await response.json());
-        }
-      } catch (err) {
-        console.error("Failed to fetch empresas for filter", err);
-      }
-    };
-    fetchEmpresas();
-  }, []);
-  
   const handleOpenAddModal = () => {
     setSelectedFuncionario(null);
     setIsModalOpen(true);
@@ -92,7 +75,7 @@ const Funcionarios: React.FC = () => {
     setSelectedFuncionario(null);
   };
 
-  const handleSave = async (funcionarioData: Omit<Funcionario, 'id' | 'createdAt' | 'updatedAt' | 'empresa'>) => {
+  const handleSave = async (funcionarioData: Omit<Funcionario, 'id' | 'createdAt' | 'updatedAt'>) => {
     const method = selectedFuncionario ? 'PUT' : 'POST';
     const url = selectedFuncionario ? `${API_URL}/${selectedFuncionario.id}` : API_URL;
 
@@ -166,14 +149,7 @@ const Funcionarios: React.FC = () => {
       
       {/* Filters */}
       <div className="mt-6 p-4 bg-white rounded-lg shadow">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <div>
-            <label htmlFor="filtroEmpresa" className="block text-sm font-medium text-gray-700">Filtrar por Empresa</label>
-            <select id="filtroEmpresa" value={filtroEmpresa} onChange={(e) => setFiltroEmpresa(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
-              <option value="">Todas</option>
-              {empresasFiltro.map(e => <option key={e.id} value={e.id}>{e.nome}</option>)}
-            </select>
-          </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
             <label htmlFor="filtroTipo" className="block text-sm font-medium text-gray-700">Filtrar por Tipo</label>
             <select id="filtroTipo" value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
@@ -203,8 +179,8 @@ const Funcionarios: React.FC = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Nome</th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Empresa</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">CPF</th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Função</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Telefone</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tipo</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
@@ -217,8 +193,8 @@ const Funcionarios: React.FC = () => {
                   ) : funcionarios.map((funcionario) => (
                     <tr key={funcionario.id}>
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{funcionario.nome}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{funcionario.empresa?.nome}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{funcionario.cpf}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{funcionario.funcao || '-'}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{funcionario.telefone || '-'}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getTipoClass(funcionario.tipo)}`}>

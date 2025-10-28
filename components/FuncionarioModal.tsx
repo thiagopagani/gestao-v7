@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
-import { Funcionario, Empresa } from '../types';
+import { Funcionario } from '../types';
 
 interface FuncionarioModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (funcionario: Omit<Funcionario, 'id' | 'createdAt' | 'updatedAt' | 'empresa'>) => void;
+  onSave: (funcionario: Omit<Funcionario, 'id' | 'createdAt' | 'updatedAt'>) => void;
   funcionario: Funcionario | null;
 }
 
@@ -15,28 +15,14 @@ const FuncionarioModal: React.FC<FuncionarioModalProps> = ({ isOpen, onClose, on
     cpf: '',
     email: '',
     telefone: '',
+    endereco: '',
+    cep: '',
+    cidade: '',
+    estado: '',
+    funcao: '',
     tipo: 'Treinamento' as 'Treinamento' | 'Autônomo',
     status: 'Ativo' as 'Ativo' | 'Inativo',
-    empresaId: '',
   });
-
-  const [empresas, setEmpresas] = useState<Empresa[]>([]);
-
-  useEffect(() => {
-    const fetchEmpresas = async () => {
-      try {
-        const response = await fetch('/api/empresas?status=Ativo');
-        if (response.ok) {
-          setEmpresas(await response.json());
-        }
-      } catch (error) {
-        console.error('Failed to fetch empresas', error);
-      }
-    };
-    if (isOpen) {
-      fetchEmpresas();
-    }
-  }, [isOpen]);
 
   useEffect(() => {
     if (funcionario) {
@@ -45,9 +31,13 @@ const FuncionarioModal: React.FC<FuncionarioModalProps> = ({ isOpen, onClose, on
         cpf: funcionario.cpf || '',
         email: funcionario.email || '',
         telefone: funcionario.telefone || '',
+        endereco: funcionario.endereco || '',
+        cep: funcionario.cep || '',
+        cidade: funcionario.cidade || '',
+        estado: funcionario.estado || '',
+        funcao: funcionario.funcao || '',
         tipo: funcionario.tipo || 'Treinamento',
         status: funcionario.status || 'Ativo',
-        empresaId: funcionario.empresaId.toString(),
       });
     } else {
       setFormData({
@@ -55,9 +45,13 @@ const FuncionarioModal: React.FC<FuncionarioModalProps> = ({ isOpen, onClose, on
         cpf: '',
         email: '',
         telefone: '',
+        endereco: '',
+        cep: '',
+        cidade: '',
+        estado: '',
+        funcao: '',
         tipo: 'Treinamento',
         status: 'Ativo',
-        empresaId: '',
       });
     }
   }, [funcionario, isOpen]);
@@ -69,15 +63,19 @@ const FuncionarioModal: React.FC<FuncionarioModalProps> = ({ isOpen, onClose, on
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.nome || !formData.cpf || !formData.empresaId) {
-      alert('Nome, CPF e Empresa são obrigatórios.');
+    if (!formData.nome || !formData.cpf) {
+      alert('Nome e CPF são obrigatórios.');
       return;
     }
     onSave({
       ...formData,
       email: formData.email || null,
       telefone: formData.telefone || null,
-      empresaId: parseInt(formData.empresaId, 10),
+      endereco: formData.endereco || null,
+      cep: formData.cep || null,
+      cidade: formData.cidade || null,
+      estado: formData.estado || null,
+      funcao: formData.funcao || null,
     });
   };
 
@@ -92,16 +90,31 @@ const FuncionarioModal: React.FC<FuncionarioModalProps> = ({ isOpen, onClose, on
             <input type="text" name="nome" id="nome" value={formData.nome} onChange={handleChange} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
           </div>
           <div>
-            <label htmlFor="empresaId" className="block text-sm font-medium text-gray-700">Empresa</label>
-            <select id="empresaId" name="empresaId" value={formData.empresaId} onChange={handleChange} required className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
-              <option value="" disabled>Selecione uma empresa</option>
-              {empresas.map(e => <option key={e.id} value={e.id}>{e.nome}</option>)}
-            </select>
-          </div>
-          <div>
             <label htmlFor="cpf" className="block text-sm font-medium text-gray-700">CPF</label>
             <input type="text" name="cpf" id="cpf" value={formData.cpf} onChange={handleChange} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
           </div>
+          <div>
+            <label htmlFor="funcao" className="block text-sm font-medium text-gray-700">Função (Opcional)</label>
+            <input type="text" name="funcao" id="funcao" value={formData.funcao} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+          </div>
+           <div>
+            <label htmlFor="endereco" className="block text-sm font-medium text-gray-700">Endereço (Opcional)</label>
+            <input type="text" name="endereco" id="endereco" value={formData.endereco} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+          </div>
+           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="cep" className="block text-sm font-medium text-gray-700">CEP (Opcional)</label>
+              <input type="text" name="cep" id="cep" value={formData.cep} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+            </div>
+            <div>
+              <label htmlFor="cidade" className="block text-sm font-medium text-gray-700">Cidade (Opcional)</label>
+              <input type="text" name="cidade" id="cidade" value={formData.cidade} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+            </div>
+          </div>
+           <div>
+              <label htmlFor="estado" className="block text-sm font-medium text-gray-700">Estado (Opcional)</label>
+              <input type="text" name="estado" id="estado" value={formData.estado} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+            </div>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email (Opcional)</label>
             <input type="email" name="email" id="email" value={formData.email} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
