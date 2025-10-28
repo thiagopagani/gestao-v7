@@ -1,12 +1,11 @@
-// FIX: This file had invalid content. Created controller functions for managing Cliente entities, including CRUD operations and filtering.
 import { Cliente, Empresa } from '../models/index.js';
+import { Op } from 'sequelize';
 
 // @desc    Criar um novo cliente
 // @route   POST /api/clientes
-// @access  Public
 export const createCliente = async (req, res) => {
     try {
-        const { nome, cnpj_cpf, endereco, telefone, status, empresaId } = req.body;
+        const { nome, cnpj_cpf, endereco, cidade, estado, telefone, status, empresaId } = req.body;
         if (!nome || !cnpj_cpf || !empresaId) {
             return res.status(400).json({ message: 'Nome, CNPJ/CPF e Empresa são obrigatórios.' });
         }
@@ -20,6 +19,8 @@ export const createCliente = async (req, res) => {
             nome,
             cnpj_cpf,
             endereco,
+            cidade,
+            estado,
             telefone,
             status: status || 'Ativo',
             empresaId
@@ -30,16 +31,22 @@ export const createCliente = async (req, res) => {
     }
 };
 
-// @desc    Obter todos os clientes com filtros
+// @desc    Obter todos os clientes com filtros e busca
 // @route   GET /api/clientes
-// @access  Public
 export const getAllClientes = async (req, res) => {
     try {
-        const { empresaId, status } = req.query;
+        const { empresaId, status, busca } = req.query;
         const whereClause = {};
 
         if (empresaId) whereClause.empresaId = empresaId;
         if (status) whereClause.status = status;
+        if (busca) {
+            whereClause[Op.or] = [
+                { nome: { [Op.like]: `%${busca}%` } },
+                { cnpj_cpf: { [Op.like]: `%${busca}%` } },
+                { cidade: { [Op.like]: `%${busca}%` } }
+            ];
+        }
 
         const clientes = await Cliente.findAll({
             where: whereClause,
@@ -58,7 +65,6 @@ export const getAllClientes = async (req, res) => {
 
 // @desc    Obter um cliente por ID
 // @route   GET /api/clientes/:id
-// @access  Public
 export const getClienteById = async (req, res) => {
     try {
         const cliente = await Cliente.findByPk(req.params.id, {
@@ -76,16 +82,17 @@ export const getClienteById = async (req, res) => {
 
 // @desc    Atualizar um cliente
 // @route   PUT /api/clientes/:id
-// @access  Public
 export const updateCliente = async (req, res) => {
     try {
         const cliente = await Cliente.findByPk(req.params.id);
         if (cliente) {
-            const { nome, cnpj_cpf, endereco, telefone, status, empresaId } = req.body;
+            const { nome, cnpj_cpf, endereco, cidade, estado, telefone, status, empresaId } = req.body;
             
             cliente.nome = nome ?? cliente.nome;
             cliente.cnpj_cpf = cnpj_cpf ?? cliente.cnpj_cpf;
             cliente.endereco = endereco ?? cliente.endereco;
+            cliente.cidade = cidade ?? cliente.cidade;
+            cliente.estado = estado ?? cliente.estado;
             cliente.telefone = telefone ?? cliente.telefone;
             cliente.status = status ?? cliente.status;
             cliente.empresaId = empresaId ?? cliente.empresaId;
@@ -102,7 +109,6 @@ export const updateCliente = async (req, res) => {
 
 // @desc    Excluir um cliente (soft delete)
 // @route   DELETE /api/clientes/:id
-// @access  Public
 export const deleteCliente = async (req, res) => {
     try {
         const cliente = await Cliente.findByPk(req.params.id);

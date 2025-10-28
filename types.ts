@@ -1,5 +1,3 @@
-// FIX: This file had invalid content. Created type definitions for the application models to resolve multiple module-not-found errors across the application.
-
 export interface Empresa {
   id: number;
   nome: string;
@@ -16,6 +14,8 @@ export interface Cliente {
   nome: string;
   cnpj_cpf: string;
   endereco?: string | null;
+  cidade?: string | null;
+  estado?: string | null;
   telefone?: string | null;
   status: 'Ativo' | 'Inativo';
   empresaId: number;

@@ -1,4 +1,3 @@
-// FIX: This file had invalid content. Created the Sequelize model for Cliente to define the database schema.
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
@@ -13,6 +12,14 @@ const Cliente = sequelize.define('Cliente', {
     unique: true,
   },
   endereco: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  cidade: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  estado: {
     type: DataTypes.STRING,
     allowNull: true,
   },
