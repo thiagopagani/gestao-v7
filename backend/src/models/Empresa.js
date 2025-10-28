@@ -1,7 +1,12 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-const Empresa = sequelize.define('Empresa', {
+const Empresa = sequelize.define('empresa', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   nome: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -13,20 +18,16 @@ const Empresa = sequelize.define('Empresa', {
   },
   endereco: {
     type: DataTypes.STRING,
-    allowNull: true,
   },
   telefone: {
     type: DataTypes.STRING,
-    allowNull: true,
   },
   status: {
     type: DataTypes.ENUM('Ativo', 'Inativo'),
-    allowNull: false,
     defaultValue: 'Ativo',
   },
 }, {
   tableName: 'empresas',
-  timestamps: true,
 });
 
 export default Empresa;

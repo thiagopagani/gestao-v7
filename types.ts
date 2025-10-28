@@ -5,8 +5,8 @@ export interface Empresa {
   endereco: string | null;
   telefone: string | null;
   status: 'Ativo' | 'Inativo';
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Cliente {
@@ -15,11 +15,15 @@ export interface Cliente {
   cnpj: string | null;
   endereco: string | null;
   telefone: string | null;
+  cidade: string | null;
+  estado: string | null;
   status: 'Ativo' | 'Inativo';
   empresaId: number;
-  empresa?: Empresa;
-  createdAt?: string;
-  updatedAt?: string;
+  empresa?: {
+    nome: string;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Funcionario {
@@ -31,9 +35,11 @@ export interface Funcionario {
   tipo: 'Autônomo' | 'Treinamento';
   status: 'Ativo' | 'Inativo';
   empresaId: number;
-  empresa?: Empresa;
-  createdAt?: string;
-  updatedAt?: string;
+  empresa?: {
+    nome: string;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Diaria {
@@ -44,10 +50,17 @@ export interface Diaria {
   observacao: string | null;
   funcionarioId: number;
   clienteId: number;
-  funcionario?: Funcionario;
-  cliente?: Cliente;
-  createdAt?: string;
-  updatedAt?: string;
+  funcionario?: {
+    nome: string;
+  };
+  cliente?: {
+    nome: string;
+    empresa?: {
+        nome: string;
+    }
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface User {
@@ -56,6 +69,6 @@ export interface User {
     email: string;
     papel: 'Admin' | 'Operador';
     status: 'Ativo' | 'Inativo';
-    createdAt?: string;
-    updatedAt?: string;
+    createdAt: string;
+    updatedAt: string;
 }

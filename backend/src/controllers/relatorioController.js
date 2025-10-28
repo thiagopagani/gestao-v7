@@ -1,52 +1,42 @@
 import { Diaria, Cliente } from '../models/index.js';
-import sequelize from '../config/database.js';
-import { Op } from 'sequelize';
+import { Op, fn, col } from 'sequelize';
 
-// @desc    Gerar relatório de diárias
-// @route   GET /api/relatorios
-// @access  Private
 export const getRelatorioDiarias = async (req, res) => {
     try {
         const { empresaId, clienteId, status, dataInicio, dataFim } = req.query;
-        const whereClause = {};
-        const includeClause = [];
+        const where = {};
+        const include = [];
 
-        if (clienteId) whereClause.clienteId = clienteId;
-        if (status) whereClause.status = status;
-        
+        if (clienteId) where.clienteId = clienteId;
+        if (status) where.status = status;
         if (dataInicio && dataFim) {
-            whereClause.data = { [Op.between]: [dataInicio, dataFim] };
-        } else if (dataInicio) {
-            whereClause.data = { [Op.gte]: dataInicio };
-        } else if (dataFim) {
-            whereClause.data = { [Op.lte]: dataFim };
+            where.data = { [Op.between]: [dataInicio, dataFim] };
         }
 
         if (empresaId) {
-             includeClause.push({
+            include.push({
                 model: Cliente,
                 as: 'cliente',
-                where: { empresaId },
-                attributes: [] // Não precisa retornar os dados do cliente
+                where: { empresaId: empresaId },
+                attributes: [] // Não precisamos dos atributos do cliente no sumário
             });
         }
 
         const summary = await Diaria.findOne({
-            where: whereClause,
-            include: includeClause,
             attributes: [
-                [sequelize.fn('SUM', sequelize.col('valor')), 'totalValor'],
-                [sequelize.fn('COUNT', sequelize.col('id')), 'totalDiarias']
+                [fn('SUM', col('valor')), 'totalValor'],
+                [fn('COUNT', col('id')), 'totalDiarias']
             ],
+            where,
+            include,
             raw: true
         });
+        
+        const totalValor = summary.totalValor ? parseFloat(summary.totalValor) : 0;
+        const totalDiarias = summary.totalDiarias ? parseInt(summary.totalDiarias, 10) : 0;
 
-        res.json({
-            totalValor: parseFloat(summary.totalValor) || 0,
-            totalDiarias: parseInt(summary.totalDiarias, 10) || 0
-        });
-
+        res.status(200).json({ totalValor, totalDiarias });
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao gerar relatório', error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };

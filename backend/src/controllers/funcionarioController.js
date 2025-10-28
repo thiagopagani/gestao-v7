@@ -1,162 +1,93 @@
 import { Funcionario, Empresa } from '../models/index.js';
 
-// @desc    Criar novo funcionário
-// @route   POST /api/funcionarios
-// @access  Private
+// Criar um novo funcionário
 export const createFuncionario = async (req, res) => {
-    const { nome, cpf, email, telefone, tipo, status, empresaId } = req.body;
-
-    if (!nome || !cpf || !empresaId) {
-        return res.status(400).json({ message: 'Nome, CPF e Empresa são obrigatórios' });
-    }
-
     try {
-        const funcionarioExists = await Funcionario.findOne({ where: { cpf } });
-        if (funcionarioExists) {
-            return res.status(400).json({ message: 'Funcionário com este CPF já existe' });
-        }
-        if (email) {
-            const emailExists = await Funcionario.findOne({ where: { email } });
-            if (emailExists) {
-                return res.status(400).json({ message: 'Este email já está em uso' });
-            }
-        }
-
-        const funcionario = await Funcionario.create({
-            nome,
-            cpf,
-            email,
-            telefone,
-            tipo,
-            status,
-            empresaId
-        });
-
+        const funcionario = await Funcionario.create(req.body);
         res.status(201).json(funcionario);
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao criar funcionário', error: error.message });
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            return res.status(400).json({ message: 'CPF ou Email já cadastrado.' });
+        }
+        res.status(400).json({ message: error.message });
     }
 };
 
-// @desc    Buscar todos os funcionários
-// @route   GET /api/funcionarios
-// @access  Private
+// Obter todos os funcionários com filtros
 export const getAllFuncionarios = async (req, res) => {
     try {
         const { empresaId, status, tipo } = req.query;
-        const whereClause = {};
-
-        if (empresaId) whereClause.empresaId = empresaId;
-        if (status) whereClause.status = status;
-        if (tipo) whereClause.tipo = tipo;
+        const where = {};
+        if (empresaId) where.empresaId = empresaId;
+        if (status) where.status = status;
+        if (tipo) where.tipo = tipo;
 
         const funcionarios = await Funcionario.findAll({
-            where: whereClause,
-            include: {
-                model: Empresa,
-                as: 'empresa',
-                attributes: ['nome']
-            },
-            order: [['nome', 'ASC']]
+            where,
+            include: [{ model: Empresa, as: 'empresa', attributes: ['nome'] }]
         });
-        res.json(funcionarios);
+        res.status(200).json(funcionarios);
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao buscar funcionários', error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
-// @desc    Buscar funcionário por ID
-// @route   GET /api/funcionarios/:id
-// @access  Private
+// Obter um funcionário por ID
 export const getFuncionarioById = async (req, res) => {
     try {
         const funcionario = await Funcionario.findByPk(req.params.id);
         if (funcionario) {
-            res.json(funcionario);
+            res.status(200).json(funcionario);
         } else {
-            res.status(404).json({ message: 'Funcionário não encontrado' });
+            res.status(404).json({ message: 'Funcionário não encontrado.' });
         }
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao buscar funcionário', error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
-// @desc    Atualizar funcionário
-// @route   PUT /api/funcionarios/:id
-// @access  Private
+// Atualizar um funcionário
 export const updateFuncionario = async (req, res) => {
     try {
-        const funcionario = await Funcionario.findByPk(req.params.id);
-        if (funcionario) {
-            const { nome, cpf, email, telefone, tipo, status, empresaId } = req.body;
-
-            if (cpf && cpf !== funcionario.cpf) {
-                const funcionarioExists = await Funcionario.findOne({ where: { cpf } });
-                if (funcionarioExists) {
-                    return res.status(400).json({ message: 'Funcionário com este CPF já existe' });
-                }
-            }
-             if (email && email !== funcionario.email) {
-                const emailExists = await Funcionario.findOne({ where: { email } });
-                if (emailExists) {
-                    return res.status(400).json({ message: 'Este email já está em uso' });
-                }
-            }
-
-            funcionario.nome = nome || funcionario.nome;
-            funcionario.cpf = cpf || funcionario.cpf;
-            funcionario.email = email;
-            funcionario.telefone = telefone;
-            funcionario.tipo = tipo || funcionario.tipo;
-            funcionario.status = status || funcionario.status;
-            funcionario.empresaId = empresaId || funcionario.empresaId;
-
-            const updatedFuncionario = await funcionario.save();
-            res.json(updatedFuncionario);
+        const [updated] = await Funcionario.update(req.body, { where: { id: req.params.id } });
+        if (updated) {
+            const updatedFuncionario = await Funcionario.findByPk(req.params.id);
+            res.status(200).json(updatedFuncionario);
         } else {
-            res.status(404).json({ message: 'Funcionário não encontrado' });
+            res.status(404).json({ message: 'Funcionário não encontrado.' });
         }
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao atualizar funcionário', error: error.message });
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            return res.status(400).json({ message: 'CPF ou Email já cadastrado em outro funcionário.' });
+        }
+        res.status(400).json({ message: error.message });
     }
 };
 
-// @desc    Deletar (desativar) funcionário
-// @route   DELETE /api/funcionarios/:id
-// @access  Private
+// Inativar um funcionário (Soft Delete)
 export const deleteFuncionario = async (req, res) => {
     try {
-        const funcionario = await Funcionario.findByPk(req.params.id);
-        if (funcionario) {
-            funcionario.status = 'Inativo';
-            await funcionario.save();
-            res.json({ message: 'Funcionário desativado com sucesso' });
+        const [updated] = await Funcionario.update({ status: 'Inativo' }, { where: { id: req.params.id } });
+        if (updated) {
+            res.status(200).json({ message: 'Funcionário inativado com sucesso.' });
         } else {
-            res.status(404).json({ message: 'Funcionário não encontrado' });
+            res.status(404).json({ message: 'Funcionário não encontrado.' });
         }
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao desativar funcionário', error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
-// @desc    Converter funcionário de Treinamento para Autônomo
-// @route   PUT /api/funcionarios/:id/converter
-// @access  Private
+// Converter um funcionário de Treinamento para Autônomo
 export const convertFuncionario = async (req, res) => {
     try {
-        const funcionario = await Funcionario.findByPk(req.params.id);
-        if (funcionario) {
-            if (funcionario.tipo === 'Treinamento') {
-                funcionario.tipo = 'Autônomo';
-                await funcionario.save();
-                res.json({ message: 'Funcionário convertido para Autônomo com sucesso' });
-            } else {
-                res.status(400).json({ message: 'Funcionário já é Autônomo' });
-            }
+        const [updated] = await Funcionario.update({ tipo: 'Autônomo' }, { where: { id: req.params.id } });
+        if (updated) {
+            res.status(200).json({ message: 'Funcionário convertido para Autônomo com sucesso.' });
         } else {
-            res.status(404).json({ message: 'Funcionário não encontrado' });
+            res.status(404).json({ message: 'Funcionário não encontrado.' });
         }
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao converter funcionário', error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };

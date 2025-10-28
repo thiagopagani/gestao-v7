@@ -1,9 +1,14 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-const Diaria = sequelize.define('Diaria', {
+const Diaria = sequelize.define('diaria', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   data: {
-    type: DataTypes.DATEONLY,
+    type: DataTypes.DATE,
     allowNull: false,
   },
   valor: {
@@ -12,32 +17,29 @@ const Diaria = sequelize.define('Diaria', {
   },
   status: {
     type: DataTypes.ENUM('Pendente', 'Aprovado', 'Cancelado'),
-    allowNull: false,
     defaultValue: 'Pendente',
   },
   observacao: {
     type: DataTypes.TEXT,
-    allowNull: true,
   },
   funcionarioId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
       model: 'funcionarios',
-      key: 'id'
-    }
+      key: 'id',
+    },
   },
   clienteId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
       model: 'clientes',
-      key: 'id'
-    }
-  }
+      key: 'id',
+    },
+  },
 }, {
   tableName: 'diarias',
-  timestamps: true,
 });
 
 export default Diaria;

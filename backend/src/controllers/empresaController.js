@@ -1,118 +1,114 @@
-import { Empresa } from '../models/index.js';
+import { Empresa, Cliente, Funcionario } from '../models/index.js';
+import { Op } from 'sequelize';
 
-// @desc    Criar nova empresa
-// @route   POST /api/empresas
-// @access  Private
+// Criar uma nova empresa
 export const createEmpresa = async (req, res) => {
-    const { nome, cnpj, endereco, telefone, status } = req.body;
-
-    if (!nome || !cnpj) {
-        return res.status(400).json({ message: 'Nome e CNPJ são obrigatórios' });
-    }
-
     try {
-        const empresaExists = await Empresa.findOne({ where: { cnpj } });
-        if (empresaExists) {
-            return res.status(400).json({ message: 'Empresa com este CNPJ já existe' });
-        }
-
-        const empresa = await Empresa.create({
-            nome,
-            cnpj,
-            endereco,
-            telefone,
-            status,
-        });
-
+        const empresa = await Empresa.create(req.body);
         res.status(201).json(empresa);
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao criar empresa', error: error.message });
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            return res.status(400).json({ message: 'CNPJ já cadastrado.' });
+        }
+        res.status(400).json({ message: error.message });
     }
 };
 
-// @desc    Buscar todas as empresas
-// @route   GET /api/empresas
-// @access  Private
+// Obter todas as empresas com filtro de status
 export const getAllEmpresas = async (req, res) => {
     try {
         const { status } = req.query;
-        const whereClause = {};
-        if (status) {
-            whereClause.status = status;
+        const where = {};
+        if (status === 'Ativo' || status === 'Inativo') {
+            where.status = status;
         }
-        const empresas = await Empresa.findAll({ where: whereClause, order: [['nome', 'ASC']] });
-        res.json(empresas);
+        const empresas = await Empresa.findAll({ where });
+        res.status(200).json(empresas);
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao buscar empresas', error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
-// @desc    Buscar empresa por ID
-// @route   GET /api/empresas/:id
-// @access  Private
+// Obter uma empresa por ID
 export const getEmpresaById = async (req, res) => {
     try {
         const empresa = await Empresa.findByPk(req.params.id);
-
         if (empresa) {
-            res.json(empresa);
+            res.status(200).json(empresa);
         } else {
-            res.status(404).json({ message: 'Empresa não encontrada' });
+            res.status(404).json({ message: 'Empresa não encontrada.' });
         }
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao buscar empresa', error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
-// @desc    Atualizar empresa
-// @route   PUT /api/empresas/:id
-// @access  Private
+// Atualizar uma empresa
 export const updateEmpresa = async (req, res) => {
     try {
-        const empresa = await Empresa.findByPk(req.params.id);
-
-        if (empresa) {
-            const { nome, cnpj, endereco, telefone, status } = req.body;
-            
-            // Verifica se o CNPJ está sendo alterado para um que já existe
-            if (cnpj && cnpj !== empresa.cnpj) {
-                const empresaExists = await Empresa.findOne({ where: { cnpj } });
-                if (empresaExists) {
-                    return res.status(400).json({ message: 'Empresa com este CNPJ já existe' });
-                }
-            }
-
-            empresa.nome = nome || empresa.nome;
-            empresa.cnpj = cnpj || empresa.cnpj;
-            empresa.endereco = endereco;
-            empresa.telefone = telefone;
-            empresa.status = status || empresa.status;
-
-            const updatedEmpresa = await empresa.save();
-            res.json(updatedEmpresa);
+        const [updated] = await Empresa.update(req.body, { where: { id: req.params.id } });
+        if (updated) {
+            const updatedEmpresa = await Empresa.findByPk(req.params.id);
+            res.status(200).json(updatedEmpresa);
         } else {
-            res.status(404).json({ message: 'Empresa não encontrada' });
+            res.status(404).json({ message: 'Empresa não encontrada.' });
         }
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao atualizar empresa', error: error.message });
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            return res.status(400).json({ message: 'CNPJ já cadastrado em outra empresa.' });
+        }
+        res.status(400).json({ message: error.message });
     }
 };
 
-// @desc    Deletar (desativar) empresa
-// @route   DELETE /api/empresas/:id
-// @access  Private
+// Inativar uma empresa (Soft Delete)
 export const deleteEmpresa = async (req, res) => {
     try {
-        const empresa = await Empresa.findByPk(req.params.id);
-
-        if (empresa) {
-            empresa.status = 'Inativo';
-            await empresa.save();
-            res.json({ message: 'Empresa desativada com sucesso' });
+        const [updated] = await Empresa.update({ status: 'Inativo' }, { where: { id: req.params.id } });
+        if (updated) {
+            res.status(200).json({ message: 'Empresa inativada com sucesso.' });
         } else {
-            res.status(404).json({ message: 'Empresa não encontrada' });
+            res.status(404).json({ message: 'Empresa não encontrada.' });
         }
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao desativar empresa', error: error.message });
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Reativar uma empresa
+export const restoreEmpresa = async (req, res) => {
+    try {
+        const [updated] = await Empresa.update({ status: 'Ativo' }, { where: { id: req.params.id } });
+        if (updated) {
+            res.status(200).json({ message: 'Empresa reativada com sucesso.' });
+        } else {
+            res.status(404).json({ message: 'Empresa não encontrada.' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+// Excluir permanentemente uma empresa
+export const forceDeleteEmpresa = async (req, res) => {
+    try {
+        const id = req.params.id;
+        // Verifica se há dependências
+        const clienteCount = await Cliente.count({ where: { empresaId: id } });
+        const funcionarioCount = await Funcionario.count({ where: { empresaId: id } });
+
+        if (clienteCount > 0 || funcionarioCount > 0) {
+            return res.status(400).json({ message: 'Não é possível excluir a empresa. Existem clientes ou funcionários vinculados.' });
+        }
+
+        const deleted = await Empresa.destroy({ where: { id } });
+        if (deleted) {
+            res.status(204).send(); // 204 No Content
+        } else {
+            res.status(404).json({ message: 'Empresa não encontrada.' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 };

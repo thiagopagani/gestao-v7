@@ -1,7 +1,12 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-const User = sequelize.define('User', {
+const User = sequelize.define('user', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   nome: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -20,17 +25,14 @@ const User = sequelize.define('User', {
   },
   papel: {
     type: DataTypes.ENUM('Admin', 'Operador'),
-    allowNull: false,
     defaultValue: 'Operador',
   },
   status: {
     type: DataTypes.ENUM('Ativo', 'Inativo'),
-    allowNull: false,
     defaultValue: 'Ativo',
   },
 }, {
   tableName: 'users',
-  timestamps: true,
 });
 
 export default User;

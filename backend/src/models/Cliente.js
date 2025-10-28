@@ -1,27 +1,34 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-const Cliente = sequelize.define('Cliente', {
+const Cliente = sequelize.define('cliente', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   nome: {
     type: DataTypes.STRING,
     allowNull: false,
   },
   cnpj: {
     type: DataTypes.STRING,
-    allowNull: true,
     unique: true,
   },
   endereco: {
     type: DataTypes.STRING,
-    allowNull: true,
+  },
+   cidade: {
+    type: DataTypes.STRING,
+  },
+  estado: {
+    type: DataTypes.STRING,
   },
   telefone: {
     type: DataTypes.STRING,
-    allowNull: true,
   },
   status: {
     type: DataTypes.ENUM('Ativo', 'Inativo'),
-    allowNull: false,
     defaultValue: 'Ativo',
   },
   empresaId: {
@@ -29,12 +36,11 @@ const Cliente = sequelize.define('Cliente', {
     allowNull: false,
     references: {
       model: 'empresas',
-      key: 'id'
-    }
-  }
+      key: 'id',
+    },
+  },
 }, {
   tableName: 'clientes',
-  timestamps: true,
 });
 
 export default Cliente;

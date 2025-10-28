@@ -5,6 +5,8 @@ import {
     getEmpresaById,
     updateEmpresa,
     deleteEmpresa,
+    forceDeleteEmpresa,
+    restoreEmpresa,
 } from '../controllers/empresaController.js';
 
 const router = express.Router();
@@ -17,5 +19,8 @@ router.route('/:id')
     .get(getEmpresaById)
     .put(updateEmpresa)
     .delete(deleteEmpresa);
+
+router.delete('/:id/force', forceDeleteEmpresa);
+router.put('/:id/restore', restoreEmpresa);
 
 export default router;
