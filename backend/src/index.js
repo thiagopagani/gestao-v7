@@ -3,7 +3,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import sequelize from './config/database.js';
 
-// Importa todas as rotas da aplicação
+// Importar modelos para garantir que sejam registrados no Sequelize
+import './models/index.js';
+
+// Importar rotas
 import empresaRoutes from './routes/empresaRoutes.js';
 import clienteRoutes from './routes/clienteRoutes.js';
 import funcionarioRoutes from './routes/funcionarioRoutes.js';
@@ -11,17 +14,16 @@ import diariaRoutes from './routes/diariaRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import relatorioRoutes from './routes/relatorioRoutes.js';
 
-// Carrega as variáveis de ambiente do arquivo .env
 dotenv.config();
 
-// Inicializa a aplicação Express
 const app = express();
+const PORT = process.env.BACKEND_PORT || 3001;
 
-// Middlewares essenciais
-app.use(cors()); // Habilita o CORS para permitir requisições do frontend
-app.use(express.json()); // Habilita o parsing de JSON no corpo das requisições
+// Middlewares
+app.use(cors());
+app.use(express.json());
 
-// Define as rotas da API
+// Rotas da API
 app.use('/api/empresas', empresaRoutes);
 app.use('/api/clientes', clienteRoutes);
 app.use('/api/funcionarios', funcionarioRoutes);
@@ -29,37 +31,40 @@ app.use('/api/diarias', diariaRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/relatorios', relatorioRoutes);
 
-const PORT = process.env.BACKEND_PORT || 3001;
-const MAX_RETRIES = 6;
-const RETRY_DELAY = 5000; // 5 segundos
+// Função de inicialização com retry para o banco de dados
+const startServer = async () => {
+    const maxRetries = 6;
+    let currentRetry = 1;
 
-// Função para conectar ao banco de dados com tentativas de reconexão
-const connectWithRetry = async (retries = 0) => {
-  try {
-    // Apenas autentica a conexão para ser mais rápido e seguro em produção
-    await sequelize.authenticate();
-    console.log('Conexão com o banco de dados estabelecida com sucesso.');
-    
-    // Sincroniza os modelos com o banco de dados.
-    // { alter: true } ajusta as tabelas sem apagar os dados.
-    await sequelize.sync({ alter: true });
-    console.log('Banco de dados conectado e sincronizado.');
+    const connectWithRetry = async () => {
+        try {
+            // Apenas autentica a conexão. É a prática mais segura para produção.
+            await sequelize.authenticate();
+            console.log('Conexão com o banco de dados estabelecida com sucesso.');
 
-    // Inicia o servidor apenas após a conexão bem-sucedida
-    app.listen(PORT, () => {
-      console.log(`Servidor rodando na porta ${PORT}`);
-    });
+            // Sincroniza o banco de dados, mas de forma segura, sem alterar ou forçar.
+            // Isso garante que as tabelas sejam criadas se não existirem, mas não mexe nelas depois.
+            await sequelize.sync(); 
+            console.log('Banco de dados sincronizado.');
 
-  } catch (error) {
-    console.error(`Falha ao conectar ou sincronizar o banco de dados (tentativa ${retries + 1}):`, error.message);
-    if (retries < MAX_RETRIES) {
-      console.log(`Tentando novamente em ${RETRY_DELAY / 1000} segundos...`);
-      setTimeout(() => connectWithRetry(retries + 1), RETRY_DELAY);
-    } else {
-      console.error('Número máximo de tentativas de conexão com o banco de dados excedido. A API não será iniciada.');
-    }
-  }
+
+            app.listen(PORT, () => {
+                console.log(`Servidor rodando na porta ${PORT}`);
+            });
+
+        } catch (error) {
+            console.error(`Falha ao conectar ou sincronizar o banco de dados (tentativa ${currentRetry}):`, error.message);
+            if (currentRetry < maxRetries) {
+                currentRetry++;
+                console.log(`Tentando novamente em 5 segundos...`);
+                setTimeout(connectWithRetry, 5000);
+            } else {
+                console.error('Número máximo de tentativas de conexão com o banco de dados excedido. A API não será iniciada.');
+            }
+        }
+    };
+
+    await connectWithRetry();
 };
 
-// Inicia o processo de conexão
-connectWithRetry();
+startServer();
