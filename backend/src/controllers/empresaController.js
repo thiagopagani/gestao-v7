@@ -2,25 +2,25 @@ import { Empresa } from '../models/index.js';
 
 // @desc    Criar uma nova empresa
 // @route   POST /api/empresas
-// @access  Public (futuramente Privado)
+// @access  Public
 export const createEmpresa = async (req, res) => {
     try {
-        const { nome, cnpj, responsavel, telefone, status } = req.body;
+        const { nome, cnpj, endereco, telefone, status } = req.body;
         if (!nome || !cnpj) {
             return res.status(400).json({ message: 'Nome e CNPJ são obrigatórios.' });
         }
-        
+
         const empresaExistente = await Empresa.findOne({ where: { cnpj } });
         if (empresaExistente) {
             return res.status(400).json({ message: 'Já existe uma empresa com este CNPJ.' });
         }
-
+        
         const novaEmpresa = await Empresa.create({
             nome,
             cnpj,
-            responsavel,
+            endereco,
             telefone,
-            status: status || 'Ativo' // Garante 'Ativo' como padrão na criação
+            status: status || 'Ativo'
         });
         res.status(201).json(novaEmpresa);
     } catch (error) {
@@ -30,10 +30,17 @@ export const createEmpresa = async (req, res) => {
 
 // @desc    Obter todas as empresas
 // @route   GET /api/empresas
-// @access  Public (futuramente Privado)
+// @access  Public
 export const getAllEmpresas = async (req, res) => {
     try {
+        const { status } = req.query;
+        const whereClause = {};
+        if (status) {
+            whereClause.status = status;
+        }
+
         const empresas = await Empresa.findAll({
+            where: whereClause,
             order: [['nome', 'ASC']]
         });
         res.status(200).json(empresas);
@@ -44,7 +51,7 @@ export const getAllEmpresas = async (req, res) => {
 
 // @desc    Obter uma empresa por ID
 // @route   GET /api/empresas/:id
-// @access  Public (futuramente Privado)
+// @access  Public
 export const getEmpresaById = async (req, res) => {
     try {
         const empresa = await Empresa.findByPk(req.params.id);
@@ -60,17 +67,16 @@ export const getEmpresaById = async (req, res) => {
 
 // @desc    Atualizar uma empresa
 // @route   PUT /api/empresas/:id
-// @access  Public (futuramente Privado)
+// @access  Public
 export const updateEmpresa = async (req, res) => {
     try {
         const empresa = await Empresa.findByPk(req.params.id);
         if (empresa) {
-            const { nome, cnpj, responsavel, telefone, status } = req.body;
+            const { nome, cnpj, endereco, telefone, status } = req.body;
             
-            // Atualiza apenas os campos fornecidos
             empresa.nome = nome ?? empresa.nome;
             empresa.cnpj = cnpj ?? empresa.cnpj;
-            empresa.responsavel = responsavel ?? empresa.responsavel;
+            empresa.endereco = endereco ?? empresa.endereco;
             empresa.telefone = telefone ?? empresa.telefone;
             empresa.status = status ?? empresa.status;
             
@@ -86,12 +92,11 @@ export const updateEmpresa = async (req, res) => {
 
 // @desc    Excluir uma empresa (soft delete)
 // @route   DELETE /api/empresas/:id
-// @access  Public (futuramente Privado)
+// @access  Public
 export const deleteEmpresa = async (req, res) => {
     try {
         const empresa = await Empresa.findByPk(req.params.id);
         if (empresa) {
-            // Em vez de deletar, altera o status para 'Inativo'
             empresa.status = 'Inativo';
             await empresa.save();
             res.status(200).json({ message: 'Empresa desativada com sucesso.' });

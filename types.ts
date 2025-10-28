@@ -1,21 +1,25 @@
-// FIX: This file had invalid content. Created type definitions for the application based on database models and usage in components.
-export interface User {
+export interface Empresa {
   id: number;
   nome: string;
-  email: string;
-  papel: 'Admin' | 'Operador';
+  cnpj: string;
+  endereco: string;
+  telefone: string;
   status: 'Ativo' | 'Inativo';
   createdAt: string;
   updatedAt: string;
 }
 
-export interface Empresa {
+export interface Cliente {
   id: number;
   nome: string;
-  cnpj: string;
-  responsavel: string | null;
+  contato: string | null;
   telefone: string | null;
-  status: 'Ativo' | 'Inativo';
+  endereco: string | null;
+  status: 'Ativo' | 'Inativo' | 'Concluído';
+  empresaId: number;
+  empresa?: {
+    nome: string;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -29,20 +33,9 @@ export interface Funcionario {
   tipo: 'Autônomo' | 'Treinamento';
   status: 'Ativo' | 'Inativo';
   empresaId: number;
-  empresa?: Empresa;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Cliente {
-  id: number;
-  nome: string;
-  contato: string | null;
-  telefone: string | null;
-  endereco: string | null;
-  status: 'Ativo' | 'Inativo' | 'Concluído';
-  empresaId: number;
-  empresa?: Empresa;
+  empresa?: {
+    nome: string;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -55,8 +48,25 @@ export interface Diaria {
   observacao: string | null;
   funcionarioId: number;
   clienteId: number;
-  funcionario?: Funcionario;
-  cliente?: Cliente;
+  funcionario?: {
+    nome: string;
+  };
+  cliente?: {
+    nome: string;
+    empresa?: {
+        nome: string;
+    }
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface User {
+  id: number;
+  nome: string;
+  email: string;
+  papel: 'Admin' | 'Operador';
+  status: 'Ativo' | 'Inativo';
   createdAt: string;
   updatedAt: string;
 }

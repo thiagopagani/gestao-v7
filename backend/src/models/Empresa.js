@@ -1,4 +1,3 @@
-
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
@@ -6,13 +5,14 @@ const Empresa = sequelize.define('Empresa', {
   nome: {
     type: DataTypes.STRING,
     allowNull: false,
+    unique: true,
   },
   cnpj: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
   },
-  responsavel: {
+  endereco: {
     type: DataTypes.STRING,
     allowNull: true,
   },

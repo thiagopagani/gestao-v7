@@ -94,14 +94,17 @@ const Empresas: React.FC = () => {
     }
   };
 
+  const getStatusClass = (status: string) => {
+    return status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+  };
 
   return (
     <div>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-3xl font-bold text-slate-800">Empresas Contratantes</h1>
+          <h1 className="text-3xl font-bold text-slate-800">Empresas</h1>
           <p className="mt-2 text-sm text-gray-700">
-            Gerencie as empresas que contratam seus serviços.
+            Gerencie as empresas contratantes dos seus serviços.
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -126,7 +129,7 @@ const Empresas: React.FC = () => {
                   <tr>
                     <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Nome</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">CNPJ</th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Responsável</th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Telefone</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
                     <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6"><span className="sr-only">Ações</span></th>
                   </tr>
@@ -138,9 +141,9 @@ const Empresas: React.FC = () => {
                     <tr key={empresa.id}>
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{empresa.nome}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{empresa.cnpj}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{empresa.responsavel || '-'}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{empresa.telefone || '-'}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${empresa.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getStatusClass(empresa.status)}`}>
                           {empresa.status}
                         </span>
                       </td>

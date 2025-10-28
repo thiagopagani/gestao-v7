@@ -13,9 +13,9 @@ const EmpresaModal: React.FC<EmpresaModalProps> = ({ isOpen, onClose, onSave, em
   const [formData, setFormData] = useState({
     nome: '',
     cnpj: '',
-    responsavel: '',
+    endereco: '',
     telefone: '',
-    status: 'Ativo',
+    status: 'Ativo' as 'Ativo' | 'Inativo',
   });
 
   useEffect(() => {
@@ -23,15 +23,16 @@ const EmpresaModal: React.FC<EmpresaModalProps> = ({ isOpen, onClose, onSave, em
       setFormData({
         nome: empresa.nome || '',
         cnpj: empresa.cnpj || '',
-        responsavel: empresa.responsavel || '',
+        endereco: empresa.endereco || '',
         telefone: empresa.telefone || '',
         status: empresa.status || 'Ativo',
       });
     } else {
+      // Reset form for new entry
       setFormData({
         nome: '',
         cnpj: '',
-        responsavel: '',
+        endereco: '',
         telefone: '',
         status: 'Ativo',
       });
@@ -49,11 +50,9 @@ const EmpresaModal: React.FC<EmpresaModalProps> = ({ isOpen, onClose, onSave, em
       alert('Nome e CNPJ são obrigatórios.');
       return;
     }
-    // FIX: The status from formData is inferred as a generic string, but onSave expects '"Ativo" | "Inativo"'.
-    // Create a new object with the correctly typed status before calling onSave to fix the type mismatch.
-    onSave({ ...formData, status: formData.status as 'Ativo' | 'Inativo' });
+    onSave(formData);
   };
-  
+
   const modalTitle = empresa ? 'Editar Empresa' : 'Adicionar Nova Empresa';
 
   return (
@@ -69,8 +68,8 @@ const EmpresaModal: React.FC<EmpresaModalProps> = ({ isOpen, onClose, onSave, em
             <input type="text" name="cnpj" id="cnpj" value={formData.cnpj} onChange={handleChange} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
           </div>
           <div>
-            <label htmlFor="responsavel" className="block text-sm font-medium text-gray-700">Responsável</label>
-            <input type="text" name="responsavel" id="responsavel" value={formData.responsavel} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+            <label htmlFor="endereco" className="block text-sm font-medium text-gray-700">Endereço</label>
+            <input type="text" name="endereco" id="endereco" value={formData.endereco} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
           </div>
           <div>
             <label htmlFor="telefone" className="block text-sm font-medium text-gray-700">Telefone</label>
@@ -79,8 +78,8 @@ const EmpresaModal: React.FC<EmpresaModalProps> = ({ isOpen, onClose, onSave, em
           <div>
             <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
             <select id="status" name="status" value={formData.status} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
-              <option>Ativo</option>
-              <option>Inativo</option>
+              <option value="Ativo">Ativo</option>
+              <option value="Inativo">Inativo</option>
             </select>
           </div>
         </div>
