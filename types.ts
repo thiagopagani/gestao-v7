@@ -1,5 +1,3 @@
-// FIX: This file had invalid content. Created type definitions for all data models used in the application.
-
 export interface Empresa {
   id: number;
   nome: string;
@@ -15,12 +13,11 @@ export interface Cliente {
   id: number;
   nome: string;
   cnpj: string | null;
-  cep: string | null;
   endereco: string | null;
   telefone: string | null;
   status: 'Ativo' | 'Inativo';
   empresaId: number;
-  empresa?: Empresa;
+  empresa?: Empresa; // Optional nested object for joins
   createdAt: string;
   updatedAt: string;
 }
@@ -34,7 +31,7 @@ export interface Funcionario {
   tipo: 'Autônomo' | 'Treinamento';
   status: 'Ativo' | 'Inativo';
   empresaId: number;
-  empresa?: Empresa;
+  empresa?: Empresa; // Optional nested object for joins
   createdAt: string;
   updatedAt: string;
 }
@@ -47,8 +44,8 @@ export interface Diaria {
   observacao: string | null;
   funcionarioId: number;
   clienteId: number;
-  funcionario?: Funcionario;
-  cliente?: Cliente;
+  funcionario?: Funcionario; // Optional nested object for joins
+  cliente?: Cliente; // Optional nested object for joins
   createdAt: string;
   updatedAt: string;
 }

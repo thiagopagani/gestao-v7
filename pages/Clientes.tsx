@@ -1,5 +1,3 @@
-// FIX: This file had invalid content. Created the Clientes page component for managing clients.
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ClienteModal from '../components/ClienteModal';
@@ -25,11 +23,10 @@ const Clientes: React.FC = () => {
 
   const fetchClientes = useCallback(async () => {
     setLoading(true);
-    const query = new URLSearchParams({
-        empresaId: filtroEmpresa,
-        status: filtroStatus,
+    const query = new URLSearchParams({ 
+        empresaId: filtroEmpresa, 
+        status: filtroStatus 
     }).toString();
-
     try {
       const response = await fetch(`${API_URL}?${query}`);
       if (!response.ok) {
@@ -48,12 +45,12 @@ const Clientes: React.FC = () => {
   useEffect(() => {
     fetchClientes();
   }, [fetchClientes]);
-
+  
   useEffect(() => {
     // Fetch companies for the filter dropdown
     const fetchEmpresasParaFiltro = async () => {
         try {
-            const response = await fetch('/api/empresas');
+            const response = await fetch('/api/empresas?status=Ativo');
             if (response.ok) {
                 const data = await response.json();
                 setEmpresasFiltro(data);
@@ -64,7 +61,7 @@ const Clientes: React.FC = () => {
     };
     fetchEmpresasParaFiltro();
   }, []);
-  
+
   const handleOpenAddModal = () => {
     setSelectedCliente(null);
     setIsModalOpen(true);
@@ -130,9 +127,9 @@ const Clientes: React.FC = () => {
     <div>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-3xl font-bold text-slate-800">Clientes</h1>
+          <h1 className="text-3xl font-bold text-slate-800">Clientes / Obras</h1>
           <p className="mt-2 text-sm text-gray-700">
-            Gerencie os seus clientes cadastrados.
+            Gerencie os clientes e obras onde os funcionários são alocados.
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -145,7 +142,7 @@ const Clientes: React.FC = () => {
           </button>
         </div>
       </div>
-
+      
       {/* Filters */}
       <div className="mt-6 p-4 bg-white rounded-lg shadow">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -192,8 +189,7 @@ const Clientes: React.FC = () => {
                   <tr>
                     <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Nome</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">CNPJ</th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">CEP</th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Empresa</th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Empresa (Contratante)</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Telefone</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
                     <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6"><span className="sr-only">Ações</span></th>
@@ -201,12 +197,11 @@ const Clientes: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {loading ? (
-                    <tr><td colSpan={7} className="text-center py-4">Carregando...</td></tr>
+                    <tr><td colSpan={6} className="text-center py-4">Carregando...</td></tr>
                   ) : clientes.map((cliente) => (
                     <tr key={cliente.id}>
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{cliente.nome}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{cliente.cnpj || '-'}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{cliente.cep || '-'}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{cliente.empresa?.nome || '-'}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{cliente.telefone || '-'}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
@@ -238,7 +233,7 @@ const Clientes: React.FC = () => {
         onClose={handleCloseModals}
         onConfirm={handleDelete}
         title="Desativar Cliente"
-        message={`Tem certeza de que deseja desativar o cliente "${selectedCliente?.nome}"? Esta ação não pode ser desfeita.`}
+        message={`Tem certeza de que deseja desativar o cliente/obra "${selectedCliente?.nome}"? Esta ação não pode ser desfeita.`}
       />
     </div>
   );

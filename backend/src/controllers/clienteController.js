@@ -1,17 +1,17 @@
 import { Cliente, Empresa } from '../models/index.js';
-import { Op } from 'sequelize';
 
 // @desc    Criar um novo cliente
 // @route   POST /api/clientes
 // @access  Public
 export const createCliente = async (req, res) => {
     try {
-        const { nome, cnpj, cep, endereco, telefone, status, empresaId } = req.body;
+        const { nome, cnpj, endereco, telefone, status, empresaId } = req.body;
         if (!nome || !empresaId) {
-            return res.status(400).json({ message: 'Nome e Empresa Contratante são obrigatórios.' });
+            return res.status(400).json({ message: 'Nome e Empresa são obrigatórios.' });
         }
-
+        
         if (cnpj) {
+            // Find client with the same CNPJ only if CNPJ is not null or empty
             const clienteExistente = await Cliente.findOne({ where: { cnpj } });
             if (clienteExistente) {
                 return res.status(400).json({ message: 'Já existe um cliente com este CNPJ.' });
@@ -21,7 +21,6 @@ export const createCliente = async (req, res) => {
         const novoCliente = await Cliente.create({
             nome,
             cnpj,
-            cep,
             endereco,
             telefone,
             status: status || 'Ativo',
@@ -33,7 +32,7 @@ export const createCliente = async (req, res) => {
     }
 };
 
-// @desc    Obter todos os clientes com filtros
+// @desc    Obter todos os clientes
 // @route   GET /api/clientes
 // @access  Public
 export const getAllClientes = async (req, res) => {
@@ -84,11 +83,10 @@ export const updateCliente = async (req, res) => {
     try {
         const cliente = await Cliente.findByPk(req.params.id);
         if (cliente) {
-            const { nome, cnpj, cep, endereco, telefone, status, empresaId } = req.body;
+            const { nome, cnpj, endereco, telefone, status, empresaId } = req.body;
             
             cliente.nome = nome ?? cliente.nome;
             cliente.cnpj = cnpj ?? cliente.cnpj;
-            cliente.cep = cep ?? cliente.cep;
             cliente.endereco = endereco ?? cliente.endereco;
             cliente.telefone = telefone ?? cliente.telefone;
             cliente.status = status ?? cliente.status;
