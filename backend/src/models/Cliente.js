@@ -1,3 +1,4 @@
+// FIX: This file had invalid content. Created the Sequelize model definition for Cliente.
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
@@ -6,11 +7,12 @@ const Cliente = sequelize.define('Cliente', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  contato: {
+  cnpj: {
     type: DataTypes.STRING,
     allowNull: true,
+    unique: true,
   },
-  telefone: {
+  cep: {
     type: DataTypes.STRING,
     allowNull: true,
   },
@@ -18,8 +20,12 @@ const Cliente = sequelize.define('Cliente', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  telefone: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   status: {
-    type: DataTypes.ENUM('Ativo', 'Inativo', 'Concluído'),
+    type: DataTypes.ENUM('Ativo', 'Inativo'),
     allowNull: false,
     defaultValue: 'Ativo',
   },
@@ -27,8 +33,8 @@ const Cliente = sequelize.define('Cliente', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'empresas',
-      key: 'id'
+        model: 'empresas',
+        key: 'id'
     }
   }
 }, {

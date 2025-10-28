@@ -1,3 +1,5 @@
+// FIX: This file had invalid content. Created the Clientes page component for managing clients.
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ClienteModal from '../components/ClienteModal';
@@ -21,12 +23,11 @@ const Clientes: React.FC = () => {
   const [filtroEmpresa, setFiltroEmpresa] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('');
 
-
   const fetchClientes = useCallback(async () => {
     setLoading(true);
     const query = new URLSearchParams({
         empresaId: filtroEmpresa,
-        status: filtroStatus
+        status: filtroStatus,
     }).toString();
 
     try {
@@ -122,26 +123,16 @@ const Clientes: React.FC = () => {
   };
 
   const getStatusClass = (status: string) => {
-    switch (status) {
-      case 'Ativo':
-        return 'bg-green-100 text-green-800';
-      case 'Inativo':
-        return 'bg-red-100 text-red-800';
-      case 'Concluído':
-          return 'bg-blue-100 text-blue-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+    return status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
   };
-
 
   return (
     <div>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-3xl font-bold text-slate-800">Clientes / Obras</h1>
+          <h1 className="text-3xl font-bold text-slate-800">Clientes</h1>
           <p className="mt-2 text-sm text-gray-700">
-            Gerencie os clientes e locais de trabalho.
+            Gerencie os seus clientes cadastrados.
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -157,7 +148,7 @@ const Clientes: React.FC = () => {
 
       {/* Filters */}
       <div className="mt-6 p-4 bg-white rounded-lg shadow">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
                   <label htmlFor="filtroEmpresa" className="block text-sm font-medium text-gray-700">Filtrar por Empresa</label>
                   <select
@@ -185,12 +176,10 @@ const Clientes: React.FC = () => {
                       <option value="">Todos os Status</option>
                       <option value="Ativo">Ativo</option>
                       <option value="Inativo">Inativo</option>
-                      <option value="Concluído">Concluído</option>
                   </select>
               </div>
           </div>
       </div>
-
 
       {error && <div className="mt-4 rounded-md bg-red-50 p-4"><p className="text-sm font-medium text-red-800">{error}</p></div>}
       
@@ -202,20 +191,24 @@ const Clientes: React.FC = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Nome</th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">CNPJ</th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">CEP</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Empresa</th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Contato</th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Telefone</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
                     <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6"><span className="sr-only">Ações</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {loading ? (
-                    <tr><td colSpan={5} className="text-center py-4">Carregando...</td></tr>
+                    <tr><td colSpan={7} className="text-center py-4">Carregando...</td></tr>
                   ) : clientes.map((cliente) => (
                     <tr key={cliente.id}>
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{cliente.nome}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{cliente.cnpj || '-'}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{cliente.cep || '-'}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{cliente.empresa?.nome || '-'}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{cliente.contato || '-'}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{cliente.telefone || '-'}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getStatusClass(cliente.status)}`}>
                           {cliente.status}

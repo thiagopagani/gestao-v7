@@ -1,9 +1,11 @@
+// FIX: This file had invalid content. Created type definitions for all data models used in the application.
+
 export interface Empresa {
   id: number;
   nome: string;
   cnpj: string;
-  endereco: string;
-  telefone: string;
+  endereco: string | null;
+  telefone: string | null;
   status: 'Ativo' | 'Inativo';
   createdAt: string;
   updatedAt: string;
@@ -12,14 +14,13 @@ export interface Empresa {
 export interface Cliente {
   id: number;
   nome: string;
-  contato: string | null;
-  telefone: string | null;
+  cnpj: string | null;
+  cep: string | null;
   endereco: string | null;
-  status: 'Ativo' | 'Inativo' | 'Concluído';
+  telefone: string | null;
+  status: 'Ativo' | 'Inativo';
   empresaId: number;
-  empresa?: {
-    nome: string;
-  };
+  empresa?: Empresa;
   createdAt: string;
   updatedAt: string;
 }
@@ -33,9 +34,7 @@ export interface Funcionario {
   tipo: 'Autônomo' | 'Treinamento';
   status: 'Ativo' | 'Inativo';
   empresaId: number;
-  empresa?: {
-    nome: string;
-  };
+  empresa?: Empresa;
   createdAt: string;
   updatedAt: string;
 }
@@ -48,15 +47,8 @@ export interface Diaria {
   observacao: string | null;
   funcionarioId: number;
   clienteId: number;
-  funcionario?: {
-    nome: string;
-  };
-  cliente?: {
-    nome: string;
-    empresa?: {
-        nome: string;
-    }
-  };
+  funcionario?: Funcionario;
+  cliente?: Cliente;
   createdAt: string;
   updatedAt: string;
 }

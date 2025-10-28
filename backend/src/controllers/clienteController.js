@@ -1,22 +1,31 @@
 import { Cliente, Empresa } from '../models/index.js';
+import { Op } from 'sequelize';
 
 // @desc    Criar um novo cliente
 // @route   POST /api/clientes
 // @access  Public
 export const createCliente = async (req, res) => {
     try {
-        const { nome, empresaId, contato, telefone, endereco, status } = req.body;
+        const { nome, cnpj, cep, endereco, telefone, status, empresaId } = req.body;
         if (!nome || !empresaId) {
-            return res.status(400).json({ message: 'Nome e Empresa são obrigatórios.' });
+            return res.status(400).json({ message: 'Nome e Empresa Contratante são obrigatórios.' });
+        }
+
+        if (cnpj) {
+            const clienteExistente = await Cliente.findOne({ where: { cnpj } });
+            if (clienteExistente) {
+                return res.status(400).json({ message: 'Já existe um cliente com este CNPJ.' });
+            }
         }
         
         const novoCliente = await Cliente.create({
             nome,
-            empresaId,
-            contato,
-            telefone,
+            cnpj,
+            cep,
             endereco,
-            status: status || 'Ativo'
+            telefone,
+            status: status || 'Ativo',
+            empresaId
         });
         res.status(201).json(novoCliente);
     } catch (error) {
@@ -32,19 +41,15 @@ export const getAllClientes = async (req, res) => {
         const { empresaId, status } = req.query;
         const whereClause = {};
 
-        if (empresaId) {
-            whereClause.empresaId = empresaId;
-        }
-        if (status) {
-            whereClause.status = status;
-        }
+        if (empresaId) whereClause.empresaId = empresaId;
+        if (status) whereClause.status = status;
 
         const clientes = await Cliente.findAll({
             where: whereClause,
             include: {
                 model: Empresa,
                 as: 'empresa',
-                attributes: ['nome'] // Inclui apenas o nome da empresa
+                attributes: ['nome']
             },
             order: [['nome', 'ASC']]
         });
@@ -79,14 +84,15 @@ export const updateCliente = async (req, res) => {
     try {
         const cliente = await Cliente.findByPk(req.params.id);
         if (cliente) {
-            const { nome, empresaId, contato, telefone, endereco, status } = req.body;
+            const { nome, cnpj, cep, endereco, telefone, status, empresaId } = req.body;
             
             cliente.nome = nome ?? cliente.nome;
-            cliente.empresaId = empresaId ?? cliente.empresaId;
-            cliente.contato = contato ?? cliente.contato;
-            cliente.telefone = telefone ?? cliente.telefone;
+            cliente.cnpj = cnpj ?? cliente.cnpj;
+            cliente.cep = cep ?? cliente.cep;
             cliente.endereco = endereco ?? cliente.endereco;
+            cliente.telefone = telefone ?? cliente.telefone;
             cliente.status = status ?? cliente.status;
+            cliente.empresaId = empresaId ?? cliente.empresaId;
             
             const updatedCliente = await cliente.save();
             res.status(200).json(updatedCliente);
