@@ -20,13 +20,28 @@ const Clientes: React.FC = () => {
   const [empresasFiltro, setEmpresasFiltro] = useState<Empresa[]>([]);
   const [filtroEmpresa, setFiltroEmpresa] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('');
+  const [busca, setBusca] = useState('');
+  const [debouncedBusca, setDebouncedBusca] = useState(busca);
+
+  // Debounce search term
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedBusca(busca);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [busca]);
 
   const fetchClientes = useCallback(async () => {
     setLoading(true);
-    const query = new URLSearchParams({ 
-        empresaId: filtroEmpresa, 
-        status: filtroStatus 
-    }).toString();
+    const params = new URLSearchParams();
+    if (filtroEmpresa) params.append('empresaId', filtroEmpresa);
+    if (filtroStatus) params.append('status', filtroStatus);
+    if (debouncedBusca) params.append('busca', debouncedBusca);
+    const query = params.toString();
+
     try {
       const response = await fetch(`${API_URL}?${query}`);
       if (!response.ok) {
@@ -40,14 +55,13 @@ const Clientes: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [filtroEmpresa, filtroStatus]);
+  }, [filtroEmpresa, filtroStatus, debouncedBusca]);
 
   useEffect(() => {
     fetchClientes();
   }, [fetchClientes]);
   
   useEffect(() => {
-    // Fetch companies for the filter dropdown
     const fetchEmpresasParaFiltro = async () => {
         try {
             const response = await fetch('/api/empresas?status=Ativo');
@@ -97,7 +111,7 @@ const Clientes: React.FC = () => {
         throw new Error(`Falha ao ${selectedCliente ? 'atualizar' : 'criar'} cliente.`);
       }
       handleCloseModals();
-      fetchClientes(); // Refresh data
+      fetchClientes();
     } catch (err: any) {
       setError(err.message);
     }
@@ -113,7 +127,7 @@ const Clientes: React.FC = () => {
         throw new Error('Falha ao desativar cliente.');
       }
       handleCloseModals();
-      fetchClientes(); // Refresh data
+      fetchClientes();
     } catch (err: any) {
       setError(err.message);
     }
@@ -127,9 +141,9 @@ const Clientes: React.FC = () => {
     <div>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-3xl font-bold text-slate-800">Clientes / Obras</h1>
+          <h1 className="text-3xl font-bold text-slate-800">Clientes</h1>
           <p className="mt-2 text-sm text-gray-700">
-            Gerencie os clientes e obras onde os funcionários são alocados.
+            Gerencie os seus clientes cadastrados.
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -145,7 +159,19 @@ const Clientes: React.FC = () => {
       
       {/* Filters */}
       <div className="mt-6 p-4 bg-white rounded-lg shadow">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <div>
+                  <label htmlFor="busca" className="block text-sm font-medium text-gray-700">Buscar</label>
+                  <input
+                      type="text"
+                      id="busca"
+                      name="busca"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                      placeholder="Nome, CNPJ ou cidade..."
+                      value={busca}
+                      onChange={(e) => setBusca(e.target.value)}
+                  />
+              </div>
               <div>
                   <label htmlFor="filtroEmpresa" className="block text-sm font-medium text-gray-700">Filtrar por Empresa</label>
                   <select
@@ -189,21 +215,23 @@ const Clientes: React.FC = () => {
                   <tr>
                     <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Nome</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">CNPJ</th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Empresa (Contratante)</th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Telefone</th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Cidade</th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Estado</th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Empresa</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
                     <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6"><span className="sr-only">Ações</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {loading ? (
-                    <tr><td colSpan={6} className="text-center py-4">Carregando...</td></tr>
+                    <tr><td colSpan={7} className="text-center py-4">Carregando...</td></tr>
                   ) : clientes.map((cliente) => (
                     <tr key={cliente.id}>
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{cliente.nome}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{cliente.cnpj || '-'}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{cliente.cidade || '-'}</td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{cliente.estado || '-'}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{cliente.empresa?.nome || '-'}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{cliente.telefone || '-'}</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getStatusClass(cliente.status)}`}>
                           {cliente.status}
@@ -233,7 +261,7 @@ const Clientes: React.FC = () => {
         onClose={handleCloseModals}
         onConfirm={handleDelete}
         title="Desativar Cliente"
-        message={`Tem certeza de que deseja desativar o cliente/obra "${selectedCliente?.nome}"? Esta ação não pode ser desfeita.`}
+        message={`Tem certeza de que deseja desativar o cliente "${selectedCliente?.nome}"?`}
       />
     </div>
   );

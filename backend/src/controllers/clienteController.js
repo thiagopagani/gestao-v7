@@ -1,17 +1,17 @@
 import { Cliente, Empresa } from '../models/index.js';
+import { Op } from 'sequelize';
 
 // @desc    Criar um novo cliente
 // @route   POST /api/clientes
 // @access  Public
 export const createCliente = async (req, res) => {
     try {
-        const { nome, cnpj, endereco, telefone, status, empresaId } = req.body;
+        const { nome, cnpj, endereco, cidade, estado, telefone, status, empresaId } = req.body;
         if (!nome || !empresaId) {
             return res.status(400).json({ message: 'Nome e Empresa são obrigatórios.' });
         }
         
         if (cnpj) {
-            // Find client with the same CNPJ only if CNPJ is not null or empty
             const clienteExistente = await Cliente.findOne({ where: { cnpj } });
             if (clienteExistente) {
                 return res.status(400).json({ message: 'Já existe um cliente com este CNPJ.' });
@@ -22,6 +22,8 @@ export const createCliente = async (req, res) => {
             nome,
             cnpj,
             endereco,
+            cidade,
+            estado,
             telefone,
             status: status || 'Ativo',
             empresaId
@@ -37,11 +39,19 @@ export const createCliente = async (req, res) => {
 // @access  Public
 export const getAllClientes = async (req, res) => {
     try {
-        const { empresaId, status } = req.query;
+        const { empresaId, status, busca } = req.query;
         const whereClause = {};
 
         if (empresaId) whereClause.empresaId = empresaId;
         if (status) whereClause.status = status;
+
+        if (busca) {
+            whereClause[Op.or] = [
+                { nome: { [Op.like]: `%${busca}%` } },
+                { cnpj: { [Op.like]: `%${busca}%` } },
+                { cidade: { [Op.like]: `%${busca}%` } }
+            ];
+        }
 
         const clientes = await Cliente.findAll({
             where: whereClause,
@@ -83,11 +93,13 @@ export const updateCliente = async (req, res) => {
     try {
         const cliente = await Cliente.findByPk(req.params.id);
         if (cliente) {
-            const { nome, cnpj, endereco, telefone, status, empresaId } = req.body;
+            const { nome, cnpj, endereco, cidade, estado, telefone, status, empresaId } = req.body;
             
             cliente.nome = nome ?? cliente.nome;
             cliente.cnpj = cnpj ?? cliente.cnpj;
             cliente.endereco = endereco ?? cliente.endereco;
+            cliente.cidade = cidade ?? cliente.cidade;
+            cliente.estado = estado ?? cliente.estado;
             cliente.telefone = telefone ?? cliente.telefone;
             cliente.status = status ?? cliente.status;
             cliente.empresaId = empresaId ?? cliente.empresaId;

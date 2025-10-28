@@ -14,6 +14,8 @@ export interface Cliente {
   nome: string;
   cnpj: string | null;
   endereco: string | null;
+  cidade: string | null;
+  estado: string | null;
   telefone: string | null;
   status: 'Ativo' | 'Inativo';
   empresaId: number;

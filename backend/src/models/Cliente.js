@@ -15,6 +15,14 @@ const Cliente = sequelize.define('Cliente', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  cidade: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  estado: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   telefone: {
     type: DataTypes.STRING,
     allowNull: true,

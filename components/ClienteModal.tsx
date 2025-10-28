@@ -14,6 +14,8 @@ const ClienteModal: React.FC<ClienteModalProps> = ({ isOpen, onClose, onSave, cl
     nome: '',
     cnpj: '',
     endereco: '',
+    cidade: '',
+    estado: '',
     telefone: '',
     status: 'Ativo' as 'Ativo' | 'Inativo',
     empresaId: '',
@@ -22,7 +24,6 @@ const ClienteModal: React.FC<ClienteModalProps> = ({ isOpen, onClose, onSave, cl
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
 
   useEffect(() => {
-    // Fetch active empresas for the dropdown
     const fetchEmpresas = async () => {
       try {
         const response = await fetch('/api/empresas?status=Ativo');
@@ -45,16 +46,19 @@ const ClienteModal: React.FC<ClienteModalProps> = ({ isOpen, onClose, onSave, cl
         nome: cliente.nome || '',
         cnpj: cliente.cnpj || '',
         endereco: cliente.endereco || '',
+        cidade: cliente.cidade || '',
+        estado: cliente.estado || '',
         telefone: cliente.telefone || '',
         status: cliente.status || 'Ativo',
         empresaId: cliente.empresaId?.toString() || '',
       });
     } else {
-      // Reset form for new entry
       setFormData({
         nome: '',
         cnpj: '',
         endereco: '',
+        cidade: '',
+        estado: '',
         telefone: '',
         status: 'Ativo',
         empresaId: '',
@@ -77,23 +81,25 @@ const ClienteModal: React.FC<ClienteModalProps> = ({ isOpen, onClose, onSave, cl
         ...formData,
         cnpj: formData.cnpj || null,
         endereco: formData.endereco || null,
+        cidade: formData.cidade || null,
+        estado: formData.estado || null,
         telefone: formData.telefone || null,
         empresaId: parseInt(formData.empresaId, 10),
     });
   };
 
-  const modalTitle = cliente ? 'Editar Cliente / Obra' : 'Adicionar Novo Cliente / Obra';
+  const modalTitle = cliente ? 'Editar Cliente' : 'Adicionar Novo Cliente';
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={modalTitle}>
       <form onSubmit={handleSubmit}>
         <div className="space-y-4">
           <div>
-            <label htmlFor="nome" className="block text-sm font-medium text-gray-700">Nome do Cliente / Obra</label>
+            <label htmlFor="nome" className="block text-sm font-medium text-gray-700">Nome do Cliente</label>
             <input type="text" name="nome" id="nome" value={formData.nome} onChange={handleChange} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
           </div>
           <div>
-            <label htmlFor="empresaId" className="block text-sm font-medium text-gray-700">Empresa (Contratante)</label>
+            <label htmlFor="empresaId" className="block text-sm font-medium text-gray-700">Empresa Contratante</label>
             <select id="empresaId" name="empresaId" value={formData.empresaId} onChange={handleChange} required className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm">
                 <option value="" disabled>Selecione uma empresa</option>
                 {empresas.map(empresa => (
@@ -106,11 +112,21 @@ const ClienteModal: React.FC<ClienteModalProps> = ({ isOpen, onClose, onSave, cl
             <input type="text" name="cnpj" id="cnpj" value={formData.cnpj} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
           </div>
           <div>
-            <label htmlFor="endereco" className="block text-sm font-medium text-gray-700">Endereço (Opcional)</label>
+            <label htmlFor="endereco" className="block text-sm font-medium text-gray-700">Endereço</label>
             <input type="text" name="endereco" id="endereco" value={formData.endereco} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="cidade" className="block text-sm font-medium text-gray-700">Cidade</label>
+              <input type="text" name="cidade" id="cidade" value={formData.cidade} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+            </div>
+            <div>
+              <label htmlFor="estado" className="block text-sm font-medium text-gray-700">Estado</label>
+              <input type="text" name="estado" id="estado" value={formData.estado} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+            </div>
+          </div>
           <div>
-            <label htmlFor="telefone" className="block text-sm font-medium text-gray-700">Telefone (Opcional)</label>
+            <label htmlFor="telefone" className="block text-sm font-medium text-gray-700">Telefone</label>
             <input type="text" name="telefone" id="telefone" value={formData.telefone} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
           </div>
           <div>
