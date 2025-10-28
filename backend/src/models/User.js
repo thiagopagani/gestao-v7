@@ -4,8 +4,8 @@ import sequelize from '../config/database.js';
 const User = sequelize.define('user', {
   id: {
     type: DataTypes.INTEGER,
-    primaryKey: true,
     autoIncrement: true,
+    primaryKey: true,
   },
   nome: {
     type: DataTypes.STRING,
@@ -25,10 +25,12 @@ const User = sequelize.define('user', {
   },
   papel: {
     type: DataTypes.ENUM('Admin', 'Operador'),
+    allowNull: false,
     defaultValue: 'Operador',
   },
   status: {
     type: DataTypes.ENUM('Ativo', 'Inativo'),
+    allowNull: false,
     defaultValue: 'Ativo',
   },
 }, {

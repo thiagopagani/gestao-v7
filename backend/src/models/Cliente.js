@@ -4,8 +4,8 @@ import sequelize from '../config/database.js';
 const Cliente = sequelize.define('cliente', {
   id: {
     type: DataTypes.INTEGER,
-    primaryKey: true,
     autoIncrement: true,
+    primaryKey: true,
   },
   nome: {
     type: DataTypes.STRING,
@@ -13,22 +13,28 @@ const Cliente = sequelize.define('cliente', {
   },
   cnpj: {
     type: DataTypes.STRING,
+    allowNull: true,
     unique: true,
   },
   endereco: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
-   cidade: {
+  cidade: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
   estado: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
   telefone: {
     type: DataTypes.STRING,
+    allowNull: true,
   },
   status: {
     type: DataTypes.ENUM('Ativo', 'Inativo'),
+    allowNull: false,
     defaultValue: 'Ativo',
   },
   empresaId: {

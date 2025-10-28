@@ -4,11 +4,11 @@ import sequelize from '../config/database.js';
 const Diaria = sequelize.define('diaria', {
   id: {
     type: DataTypes.INTEGER,
-    primaryKey: true,
     autoIncrement: true,
+    primaryKey: true,
   },
   data: {
-    type: DataTypes.DATE,
+    type: DataTypes.DATEONLY,
     allowNull: false,
   },
   valor: {
@@ -17,10 +17,12 @@ const Diaria = sequelize.define('diaria', {
   },
   status: {
     type: DataTypes.ENUM('Pendente', 'Aprovado', 'Cancelado'),
+    allowNull: false,
     defaultValue: 'Pendente',
   },
   observacao: {
     type: DataTypes.TEXT,
+    allowNull: true,
   },
   funcionarioId: {
     type: DataTypes.INTEGER,
