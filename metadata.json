@@ -1,0 +1,5 @@
+{
+  "name": "gestao-v7",
+  "description": "Uma aplicação web completa para a gestão de serviços terceirizados, incluindo controle de empresas contratantes, clientes, funcionários, diárias e relatórios detalhados.",
+  "requestFramePermissions": []
+}
