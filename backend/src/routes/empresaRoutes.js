@@ -5,8 +5,8 @@ import {
     getEmpresaById,
     updateEmpresa,
     deleteEmpresa,
-    forceDeleteEmpresa,
     restoreEmpresa,
+    forceDeleteEmpresa,
 } from '../controllers/empresaController.js';
 
 const router = express.Router();
@@ -18,9 +18,9 @@ router.route('/')
 router.route('/:id')
     .get(getEmpresaById)
     .put(updateEmpresa)
-    .delete(deleteEmpresa); // Rota para inativar (soft delete)
+    .delete(deleteEmpresa); // Soft delete (inativa)
 
-router.delete('/:id/force', forceDeleteEmpresa); // Rota para exclusão permanente
 router.put('/:id/restore', restoreEmpresa); // Rota para reativar
+router.delete('/:id/force', forceDeleteEmpresa); // Rota para exclusão permanente
 
 export default router;

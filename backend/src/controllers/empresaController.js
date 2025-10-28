@@ -17,18 +17,18 @@ export const createEmpresa = async (req, res) => {
 // Obter todas as empresas com filtros
 export const getAllEmpresas = async (req, res) => {
     try {
-        const { status } = req.query;
+        const { status, busca } = req.query;
         const where = {};
-        if (status) {
-            where.status = status;
-        } else {
-            where.status = 'Ativo'; // Default to active if no status is provided
+        if (status) where.status = status;
+        if (busca) {
+            where[Op.or] = [
+                { nome: { [Op.like]: `%${busca}%` } },
+                { cnpj: { [Op.like]: `%${busca}%` } },
+                { cidade: { [Op.like]: `%${busca}%` } }
+            ];
         }
 
-        const empresas = await Empresa.findAll({
-            where,
-            order: [['nome', 'ASC']]
-        });
+        const empresas = await Empresa.findAll({ where, order: [['nome', 'ASC']] });
         res.status(200).json(empresas);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -60,7 +60,7 @@ export const updateEmpresa = async (req, res) => {
             res.status(404).json({ message: 'Empresa não encontrada.' });
         }
     } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
+         if (error.name === 'SequelizeUniqueConstraintError') {
             return res.status(400).json({ message: 'CNPJ já cadastrado em outra empresa.' });
         }
         res.status(400).json({ message: error.message });
@@ -95,20 +95,21 @@ export const restoreEmpresa = async (req, res) => {
     }
 };
 
+
 // Excluir permanentemente uma empresa
 export const forceDeleteEmpresa = async (req, res) => {
+    const { id } = req.params;
     try {
-        const id = req.params.id;
-        
-        // Verificação de segurança: impede a exclusão se houver clientes vinculados
+        // Medida de segurança: verificar se a empresa tem clientes vinculados
         const clienteCount = await Cliente.count({ where: { empresaId: id } });
+
         if (clienteCount > 0) {
-            return res.status(400).json({ message: 'Não é possível excluir a empresa pois existem clientes vinculados a ela.' });
+            return res.status(400).json({ message: 'Não é possível excluir a empresa pois ela possui clientes vinculados.' });
         }
 
-        const deleted = await Empresa.destroy({ where: { id: id } });
+        const deleted = await Empresa.destroy({ where: { id } });
         if (deleted) {
-            res.status(200).json({ message: 'Empresa excluída permanentemente com sucesso.' });
+            res.status(200).json({ message: 'Empresa excluída permanentemente.' });
         } else {
             res.status(404).json({ message: 'Empresa não encontrada.' });
         }
