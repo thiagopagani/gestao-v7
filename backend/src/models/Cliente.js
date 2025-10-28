@@ -6,20 +6,12 @@ const Cliente = sequelize.define('Cliente', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  cnpj_cpf: {
+  cnpj: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
     unique: true,
   },
   endereco: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  cidade: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  estado: {
     type: DataTypes.STRING,
     allowNull: true,
   },
@@ -36,8 +28,8 @@ const Cliente = sequelize.define('Cliente', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-        model: 'empresas',
-        key: 'id'
+      model: 'empresas',
+      key: 'id'
     }
   }
 }, {
