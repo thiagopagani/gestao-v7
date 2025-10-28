@@ -33,7 +33,7 @@ app.use('/api/relatorios', relatorioRoutes);
 const PORT = process.env.BACKEND_PORT || 3001;
 
 // Sincronizar banco de dados e iniciar o servidor
-sequelize.sync({ force: true }) // Usa force: true para recriar o DB e resolver o erro de sincronização
+sequelize.sync({ alter: true }) // Usa alter: true para fazer alterações não destrutivas
   .then(() => {
     console.log('Banco de dados conectado e sincronizado.');
     app.listen(PORT, () => {
