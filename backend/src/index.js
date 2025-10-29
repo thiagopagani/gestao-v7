@@ -1,10 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import bcrypt from 'bcryptjs';
 import sequelize from './config/database.js';
 
 // Importar modelos para garantir que sejam registrados no Sequelize
-import './models/index.js';
+import { User } from './models/index.js';
 
 // Importar rotas
 import empresaRoutes from './routes/empresaRoutes.js';
@@ -31,6 +32,29 @@ app.use('/api/diarias', diariaRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/relatorios', relatorioRoutes);
 
+// Função para criar o usuário admin padrão se não existir
+const seedAdminUser = async () => {
+    try {
+      const adminEmail = 'admin@gestao.com';
+      const adminExists = await User.findOne({ where: { email: adminEmail } });
+  
+      if (!adminExists) {
+        console.log('Criando usuário administrador padrão...');
+        const hashedPassword = await bcrypt.hash('admin123', 10);
+        await User.create({
+          nome: 'Administrador',
+          email: adminEmail,
+          password: hashedPassword,
+          papel: 'Admin',
+          status: 'Ativo',
+        });
+        console.log('Usuário administrador padrão criado com sucesso. Email: admin@gestao.com | Senha: admin123');
+      }
+    } catch (error) {
+      console.error('Falha ao criar usuário administrador padrão:', error);
+    }
+};
+
 // Função de inicialização com retry para o banco de dados
 const startServer = async () => {
     const maxRetries = 6;
@@ -47,6 +71,8 @@ const startServer = async () => {
             await sequelize.sync(); 
             console.log('Banco de dados sincronizado.');
 
+            // Cria o usuário admin padrão após a sincronização
+            await seedAdminUser();
 
             app.listen(PORT, () => {
                 console.log(`Servidor rodando na porta ${PORT}`);
