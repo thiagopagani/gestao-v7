@@ -108,7 +108,8 @@ const startServer = async () => {
             
             return; // Sai da função se tudo ocorreu bem
         } catch (error) {
-            console.error(`Falha ao conectar ou sincronizar o banco de dados (tentativa ${attempt}/${maxRetries}):`, error.message);
+            // Log do erro completo para diagnóstico preciso
+            console.error(`Falha ao conectar ou sincronizar o banco de dados (tentativa ${attempt}/${maxRetries}):`, error);
             if (attempt < maxRetries) {
                 console.log('Tentando novamente em 5 segundos...');
                 await delay(5000);

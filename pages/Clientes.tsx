@@ -34,13 +34,24 @@ const Clientes: React.FC = () => {
     try {
       const response = await fetch(`${API_URL}?${query}`);
       if (!response.ok) {
-        throw new Error('Falha ao buscar dados dos clientes.');
+        let errorText = `Erro ${response.status}: ${response.statusText}`;
+        if (response.status === 503) {
+            errorText = 'Serviço indisponível (Service Unavailable). A API pode estar offline.';
+        } else {
+            try {
+                const errorData = await response.json();
+                errorText = errorData.message || errorText;
+            } catch (e) {
+                // Ignore JSON parsing error
+            }
+        }
+        throw new Error(errorText);
       }
       const data = await response.json();
       setClientes(data);
     } catch (err: any) {
-      if (err instanceof TypeError) { // NetworkError
-        setError("Erro de comunicação com o servidor. A API pode estar indisponível.");
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        setError("Erro de comunicação com a API. Verifique se o servidor está no ar.");
       } else {
         setError(err.message);
       }
