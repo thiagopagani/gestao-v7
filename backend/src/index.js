@@ -19,14 +19,13 @@ import userRoutes from './routes/userRoutes.js';
 import relatorioRoutes from './routes/relatorioRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 
-dotenv.config();
+// ES Module equivalent of __dirname and robust .env loading
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
-
-// ES Module equivalent of __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Middlewares
 app.use(helmet());
@@ -42,17 +41,18 @@ app.use('/api/diarias', diariaRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/relatorios', relatorioRoutes);
 
+// Catch-all for API routes that don't exist to ensure JSON 404 response
+app.use('/api/*', (req, res) => {
+    res.status(404).json({ message: 'Endpoint de API não encontrado.' });
+});
+
 // Servir arquivos estáticos do frontend buildado
 const frontendDistPath = path.resolve(__dirname, '..', '..', 'dist');
 app.use(express.static(frontendDistPath));
 
 // Rota catch-all para lidar com o roteamento do React (SPA)
 app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api/')) {
-        res.sendFile(path.join(frontendDistPath, 'index.html'));
-    } else {
-        res.status(404).json({ message: 'Endpoint não encontrado.' });
-    }
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
 });
 
 // Função para criar o usuário admin padrão se não existir
@@ -106,6 +106,7 @@ const startServer = async () => {
                 await delay(5000);
             } else {
                 console.error('Número máximo de tentativas de conexão com o banco de dados excedido. A API não será iniciada.');
+                process.exit(1); // Exit with a failure code to signal a fatal error
             }
         }
     }
