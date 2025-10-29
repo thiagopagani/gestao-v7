@@ -1,13 +1,8 @@
 import { Sequelize } from 'sequelize';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-// Resolve path to .env file at the root of the 'backend' directory
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
-
+// As variáveis de ambiente agora são carregadas pelo 'loadEnv.js'
+// que é importado no topo do 'index.js'.
+// Este arquivo apenas consome as variáveis que já devem existir.
 
 const sequelize = new Sequelize(
   process.env.DB_NAME,
