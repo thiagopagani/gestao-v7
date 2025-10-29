@@ -27,11 +27,18 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             if (response.ok) {
                 onLogin();
             } else {
-                const errorData = await response.json();
-                setError(errorData.message || 'Falha ao fazer login.');
+                let errorMessage = `Erro: ${response.status} ${response.statusText}`;
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || 'Falha ao fazer login.';
+                } catch (jsonError) {
+                    console.error('Could not parse error response as JSON.', jsonError);
+                }
+                setError(errorMessage);
             }
         } catch (err) {
-            setError('Não foi possível conectar ao servidor. Tente novamente.');
+            console.error('Network or other error during login:', err);
+            setError('Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.');
         } finally {
             setLoading(false);
         }

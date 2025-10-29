@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import helmet from 'helmet';
 import sequelize from './config/database.js';
 
 // Importar modelos para garantir que sejam registrados no Sequelize
@@ -28,6 +29,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Middlewares
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
