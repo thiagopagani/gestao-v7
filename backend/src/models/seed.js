@@ -1,6 +1,5 @@
 import bcrypt from 'bcryptjs';
 import User from './User.js';
-import { logInfo, logError } from '../utils/logger.js';
 
 /**
  * Verifica se um usuário administrador padrão existe e, se não, o cria.
@@ -11,7 +10,7 @@ export const seedAdminUser = async () => {
     const adminExists = await User.findOne({ where: { email: 'admin@gestao.com' } });
 
     if (!adminExists) {
-      logInfo('Usuário administrador padrão não encontrado. Criando...');
+      console.log('[Seed] Usuário administrador padrão não encontrado. Criando...');
       const hashedPassword = await bcrypt.hash('admin123', 10);
       await User.create({
         nome: 'Administrador Padrão',
@@ -20,13 +19,12 @@ export const seedAdminUser = async () => {
         papel: 'Admin',
         status: 'Ativo',
       });
-      logInfo('Usuário administrador padrão criado com sucesso.');
+      console.log('[Seed] Usuário administrador padrão criado com sucesso.');
     } else {
-      logInfo('Usuário administrador padrão já existe.');
+      // Não precisa logar nada se já existir, para manter o log limpo.
     }
   } catch (error) {
-    logError('Erro ao tentar criar o usuário administrador padrão.', error);
+    console.error('[Seed] Erro ao tentar criar o usuário administrador padrão.', error);
     // Não encerra o processo, pois a aplicação pode funcionar sem o seed.
-    // A falha será registrada no log para depuração.
   }
 };
