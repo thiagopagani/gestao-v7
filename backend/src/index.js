@@ -47,9 +47,15 @@ const frontendDistPath = path.resolve(__dirname, '..', '..', 'dist');
 app.use(express.static(frontendDistPath));
 
 // Rota catch-all para lidar com o roteamento do React (SPA)
-// Qualquer requisição que não seja para a API será direcionada para o index.html
+// Qualquer requisição GET que não seja para a API e não seja um arquivo estático,
+// será direcionada para o index.html, permitindo que o React Router funcione.
 app.get('*', (req, res) => {
-    res.sendFile(path.join(frontendDistPath, 'index.html'));
+    if (!req.path.startsWith('/api/')) {
+        res.sendFile(path.join(frontendDistPath, 'index.html'));
+    } else {
+        // Se for uma rota de API não encontrada, retorna 404
+        res.status(404).json({ message: 'Endpoint não encontrado.' });
+    }
 });
 
 // Função para criar o usuário admin padrão se não existir
