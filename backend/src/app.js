@@ -1,10 +1,11 @@
+import './config/env.js'; // Garante que as variáveis de ambiente sejam carregadas primeiro
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Importa todas as rotas
+// Importa as rotas
 import empresaRoutes from './routes/empresaRoutes.js';
 import clienteRoutes from './routes/clienteRoutes.js';
 import funcionarioRoutes from './routes/funcionarioRoutes.js';
@@ -13,21 +14,24 @@ import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import relatorioRoutes from './routes/relatorioRoutes.js';
 
-// Importa os modelos para garantir que as associações sejam carregadas na inicialização
-import './models/index.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
 
-// Middlewares essenciais
+// Middlewares de segurança e parse
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rotas da API
+
+// Configuração para servir os arquivos estáticos do frontend
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const frontendDistPath = path.join(__dirname, '..', '..', 'dist');
+
+app.use(express.static(frontendDistPath));
+
+
+// Define as rotas da API
 app.use('/api/empresas', empresaRoutes);
 app.use('/api/clientes', clienteRoutes);
 app.use('/api/funcionarios', funcionarioRoutes);
@@ -38,15 +42,12 @@ app.use('/api/relatorios', relatorioRoutes);
 
 // Rota de verificação de "saúde" da API
 app.get('/api/health', (req, res) => {
-    res.status(200).json({ status: 'ok', message: 'API is healthy' });
+  res.status(200).json({ status: 'ok', message: 'API is running' });
 });
 
-// Configuração para servir o frontend
-const frontendDistPath = path.resolve(__dirname, '..', '..', 'dist');
-app.use(express.static(frontendDistPath));
-
-// Rota "catch-all" para direcionar qualquer outra requisição para o frontend (SPA)
+// Rota "catch-all" para servir o index.html do frontend para qualquer rota que não seja da API
 app.get('*', (req, res) => {
+  // Se a requisição não for para a API, serve o frontend
   if (!req.originalUrl.startsWith('/api')) {
     res.sendFile(path.join(frontendDistPath, 'index.html'));
   } else {
@@ -54,5 +55,6 @@ app.get('*', (req, res) => {
     res.status(404).json({ message: 'Endpoint não encontrado.' });
   }
 });
+
 
 export default app;
