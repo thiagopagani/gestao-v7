@@ -1,14 +1,31 @@
-// Este arquivo não deve carregar o .env. Ele assume que já foi carregado.
 import { Sequelize } from 'sequelize';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Carrega as variáveis de ambiente ANTES de qualquer outra coisa.
+// Isso é crucial para garantir que as credenciais do banco estejam disponíveis.
+try {
+  const __dirname = path.dirname(new URL(import.meta.url).pathname);
+  const envPath = path.resolve(__dirname, '..', '..', '.env');
+  dotenv.config({ path: envPath });
+} catch (e) {
+    console.error('Erro ao carregar o arquivo .env. Certifique-se de que ele existe em backend/.env', e);
+    process.exit(1);
+}
+
+// Validação das variáveis de ambiente
+const requiredEnvVars = ['DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_HOST'];
+const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingVars.length > 0) {
+    console.error(`ERRO FATAL: Variáveis de ambiente obrigatórias ausentes: ${missingVars.join(', ')}`);
+    console.error('Verifique seu arquivo backend/.env');
+    process.exit(1);
+}
 
 let sequelize;
 
 try {
-  // Verificação de segurança para garantir que as variáveis existem
-  if (!process.env.DB_NAME || !process.env.DB_USER || !process.env.DB_PASSWORD || !process.env.DB_HOST) {
-    throw new Error('As variáveis de ambiente do banco de dados não estão definidas. O servidor não pode iniciar.');
-  }
-
   sequelize = new Sequelize(
     process.env.DB_NAME,
     process.env.DB_USER,
@@ -16,9 +33,9 @@ try {
     {
       host: process.env.DB_HOST,
       dialect: 'mariadb',
-      logging: false, // Em produção, o logging pode ser desativado ou direcionado
+      logging: false,
       pool: {
-        max: 5,
+        max: 10,
         min: 0,
         acquire: 30000,
         idle: 10000
@@ -27,11 +44,10 @@ try {
   );
 } catch (error) {
     console.error('---------------------------------------------------------------');
-    console.error('ERRO FATAL AO INICIALIZAR O SEQUELIZE (CONEXÃO COM O BANCO):');
+    console.error('ERRO FATAL AO CRIAR A INSTÂNCIA DO SEQUELIZE:');
     console.error(error);
     console.error('---------------------------------------------------------------');
     process.exit(1);
 }
-
 
 export default sequelize;
