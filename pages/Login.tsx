@@ -1,13 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface LoginProps {
     onLogin: () => void;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
-    const handleSubmit = (event: React.FormEvent) => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        onLogin();
+        setLoading(true);
+        setError(null);
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
+
+            if (response.ok) {
+                onLogin();
+            } else {
+                const errorData = await response.json();
+                setError(errorData.message || 'Falha ao fazer login.');
+            }
+        } catch (err) {
+            setError('Não foi possível conectar ao servidor. Tente novamente.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -31,6 +58,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                                 type="email"
                                 autoComplete="email"
                                 required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
                                 placeholder="Email"
                             />
@@ -43,17 +72,27 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                                 type="password"
                                 autoComplete="current-password"
                                 required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 className="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
                                 placeholder="Senha"
                             />
                         </div>
                     </div>
+
+                    {error && (
+                        <div className="rounded-md bg-red-50 p-4">
+                            <p className="text-sm font-medium text-red-800">{error}</p>
+                        </div>
+                    )}
+
                     <div>
                         <button
                             type="submit"
-                            className="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            disabled={loading}
+                            className="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-blue-300"
                         >
-                            Entrar
+                            {loading ? 'Entrando...' : 'Entrar'}
                         </button>
                     </div>
                 </form>

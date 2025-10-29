@@ -14,6 +14,7 @@ import funcionarioRoutes from './routes/funcionarioRoutes.js';
 import diariaRoutes from './routes/diariaRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import relatorioRoutes from './routes/relatorioRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use(cors());
 app.use(express.json());
 
 // Rotas da API
+app.use('/api/auth', authRoutes);
 app.use('/api/empresas', empresaRoutes);
 app.use('/api/clientes', clienteRoutes);
 app.use('/api/funcionarios', funcionarioRoutes);
