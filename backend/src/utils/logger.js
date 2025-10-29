@@ -5,14 +5,22 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Caminho para a pasta de logs, um nível acima de 'utils'
-const logDir = path.resolve(__dirname, '..', 'logs');
+// O caminho correto para a pasta 'backend' é dois níveis acima de 'utils'
+const backendDir = path.resolve(__dirname, '..', '..');
+const logDir = path.join(backendDir, 'logs');
 const logFilePath = path.join(logDir, 'error.log');
 
 // Garante que o diretório de logs exista
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir);
+try {
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+  }
+} catch (err) {
+  console.error('Falha crítica ao criar o diretório de logs:', err);
+  // Se não for possível nem criar o diretório de log, não há muito o que fazer.
+  // O processo provavelmente irá falhar na próxima tentativa de escrita.
 }
+
 
 const logToFile = (level, message, error = null) => {
   const timestamp = new Date().toISOString();
@@ -20,7 +28,7 @@ const logToFile = (level, message, error = null) => {
   
   if (error) {
     // Inclui a pilha de erros para um diagnóstico completo
-    logMessage += `\n${error.stack || error}\n`;
+    logMessage += `\n${error.stack || JSON.stringify(error, null, 2)}\n`;
   }
   
   logMessage += '\n';
@@ -35,11 +43,11 @@ const logToFile = (level, message, error = null) => {
 };
 
 export const logInfo = (message) => {
-  console.log(message);
+  console.log(`[INFO] ${message}`);
   logToFile('info', message);
 };
 
 export const logError = (message, error) => {
-  console.error(message, error);
+  console.error(`[ERROR] ${message}`, error || '');
   logToFile('error', message, error);
 };
