@@ -1,3 +1,4 @@
+import './loadEnv.js'; // FORÇA O CARREGAMENTO DAS VARIÁVEIS DE AMBIENTE PRIMEIRO
 import { Sequelize } from 'sequelize';
 
 // As variáveis de ambiente agora são carregadas pelo 'loadEnv.js'
