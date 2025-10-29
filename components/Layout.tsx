@@ -1,9 +1,10 @@
 import React, { useState, ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
-import { HomeIcon, BuildingOffice2Icon, UserGroupIcon, BriefcaseIcon, CurrencyDollarIcon, DocumentTextIcon, DocumentChartBarIcon, UsersIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, BuildingOffice2Icon, UserGroupIcon, BriefcaseIcon, CurrencyDollarIcon, DocumentTextIcon, DocumentChartBarIcon, UsersIcon, Bars3Icon, XMarkIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 interface LayoutProps {
   children: ReactNode;
+  onLogout: () => void;
 }
 
 const navItems = [
@@ -17,7 +18,7 @@ const navItems = [
   { name: 'Usuários', href: '/usuarios', icon: UsersIcon },
 ];
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout: React.FC<LayoutProps> = ({ children, onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const NavLinks = () => (
@@ -94,7 +95,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {/* Search bar can go here */}
             </div>
             <div className="ml-4 flex items-center md:ml-6">
-              {/* Profile dropdown can go here */}
+              <button
+                type="button"
+                onClick={onLogout}
+                className="flex items-center p-2 text-gray-500 rounded-md hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                aria-label="Sair"
+              >
+                <ArrowRightOnRectangleIcon className="h-6 w-6" aria-hidden="true" />
+                <span className="hidden md:block ml-2 text-sm font-medium">Sair</span>
+              </button>
             </div>
           </div>
         </div>

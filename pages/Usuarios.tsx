@@ -171,7 +171,9 @@ const Usuarios: React.FC = () => {
         onClose={handleCloseModals}
         onConfirm={handleDelete}
         title="Desativar Usuário"
-        message={`Tem certeza de que deseja desativar o usuário "${selectedUser?.nome}"? Esta ação não pode ser desfeita.`}
+        message={`Tem certeza de que deseja desativar o usuário "${selectedUser?.nome}"? Ele não poderá mais acessar o sistema.`}
+        confirmText="Desativar"
+        variant="primary"
       />
     </div>
   );

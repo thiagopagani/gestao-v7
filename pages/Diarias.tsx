@@ -266,6 +266,8 @@ const Diarias: React.FC = () => {
         onConfirm={handleDelete}
         title="Cancelar Diária"
         message={`Tem certeza de que deseja cancelar esta diária? O status será alterado para "Cancelado".`}
+        confirmText="Sim, Cancelar"
+        variant="primary"
       />
     </div>
   );

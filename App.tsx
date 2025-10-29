@@ -12,8 +12,12 @@ import Usuarios from './pages/Usuarios';
 import Login from './pages/Login';
 
 const App: React.FC = () => {
-  // Simple auth state simulation. Replace with context or a state management library.
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  // Simple auth state simulation. Start as not authenticated.
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
 
   return (
     <HashRouter>
@@ -23,7 +27,7 @@ const App: React.FC = () => {
           path="/*" 
           element={
             isAuthenticated ? (
-              <Layout>
+              <Layout onLogout={handleLogout}>
                 <Routes>
                   <Route index element={<Navigate to="/dashboard" replace />} />
                   <Route path="/dashboard" element={<Dashboard />} />
