@@ -1,3 +1,6 @@
+import { logInfo, logError } from './utils/logger.js';
+logInfo('Iniciando a execução do servidor...');
+
 import './config/loadEnv.js'; // IMPORTANTE: Carrega e VALIDA as variáveis de ambiente primeiro
 
 import express from 'express';
@@ -31,6 +34,7 @@ const PORT = process.env.BACKEND_PORT || 3001;
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+logInfo('Middlewares configurados.');
 
 // Rota de diagnóstico (Health Check)
 app.get('/api/health', (req, res) => {
@@ -45,6 +49,7 @@ app.use('/api/funcionarios', funcionarioRoutes);
 app.use('/api/diarias', diariaRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/relatorios', relatorioRoutes);
+logInfo('Rotas da API configuradas.');
 
 // Catch-all for API routes that don't exist to ensure JSON 404 response
 app.use('/api/*', (req, res) => {
@@ -54,6 +59,7 @@ app.use('/api/*', (req, res) => {
 // Servir arquivos estáticos do frontend buildado
 const frontendDistPath = path.resolve(__dirname, '..', '..', 'dist');
 app.use(express.static(frontendDistPath));
+logInfo(`Servindo arquivos estáticos de: ${frontendDistPath}`);
 
 // Rota catch-all para lidar com o roteamento do React (SPA)
 app.get('*', (req, res) => {
@@ -67,7 +73,7 @@ const seedAdminUser = async () => {
       const adminExists = await User.findOne({ where: { email: adminEmail } });
   
       if (!adminExists) {
-        console.log('Criando usuário administrador padrão...');
+        logInfo('Criando usuário administrador padrão...');
         const hashedPassword = await bcrypt.hash('admin123', 10);
         await User.create({
           nome: 'Administrador',
@@ -76,10 +82,10 @@ const seedAdminUser = async () => {
           papel: 'Admin',
           status: 'Ativo',
         });
-        console.log('Usuário administrador padrão criado com sucesso. Email: admin@gestao.com | Senha: admin123');
+        logInfo('Usuário administrador padrão criado com sucesso. Email: admin@gestao.com | Senha: admin123');
       }
     } catch (error) {
-      console.error('Falha ao criar usuário administrador padrão:', error);
+      logError('Falha ao criar usuário administrador padrão:', error);
     }
 };
 
@@ -88,33 +94,30 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Função de inicialização robusta com retry para o banco de dados
 const startServer = async () => {
-    console.log(`Tentando conectar ao banco de dados: Host=${process.env.DB_HOST}, Database=${process.env.DB_NAME}`);
+    logInfo(`Tentando conectar ao banco de dados: Host=${process.env.DB_HOST}, Database=${process.env.DB_NAME}`);
     const maxRetries = 6;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
             await sequelize.authenticate();
-            console.log('Conexão com o banco de dados estabelecida com sucesso.');
+            logInfo('Conexão com o banco de dados estabelecida com sucesso.');
 
-            // Sincroniza o banco de dados. { alter: true } ajusta as tabelas para corresponder aos modelos.
-            // Isso evita a necessidade de apagar o banco de dados manualmente após alterações nos modelos.
             await sequelize.sync({ alter: true }); 
-            console.log('Banco de dados sincronizado.');
+            logInfo('Banco de dados sincronizado.');
 
             await seedAdminUser();
 
             app.listen(PORT, () => {
-                console.log(`Servidor rodando na porta ${PORT}`);
+                logInfo(`Servidor rodando e ouvindo na porta ${PORT}`);
             });
             
             return; // Sai da função se tudo ocorreu bem
         } catch (error) {
-            // Log do erro completo para diagnóstico preciso
-            console.error(`Falha ao conectar ou sincronizar o banco de dados (tentativa ${attempt}/${maxRetries}):`, error);
+            logError(`Falha ao conectar ou sincronizar o banco de dados (tentativa ${attempt}/${maxRetries}):`, error);
             if (attempt < maxRetries) {
-                console.log('Tentando novamente em 5 segundos...');
+                logInfo('Tentando novamente em 5 segundos...');
                 await delay(5000);
             } else {
-                console.error('Número máximo de tentativas de conexão com o banco de dados excedido. A API não será iniciada.');
+                logError('Número máximo de tentativas de conexão com o banco de dados excedido. A API não será iniciada.', null);
                 process.exit(1); // Exit with a failure code to signal a fatal error
             }
         }
