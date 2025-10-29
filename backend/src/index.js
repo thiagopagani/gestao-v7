@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import sequelize from './config/database.js';
 
 // Importar modelos para garantir que sejam registrados no Sequelize
@@ -21,6 +23,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
 
+// ES Module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Middlewares
 app.use(cors());
 app.use(express.json());
@@ -33,6 +39,16 @@ app.use('/api/funcionarios', funcionarioRoutes);
 app.use('/api/diarias', diariaRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/relatorios', relatorioRoutes);
+
+// Servir arquivos estáticos do frontend buildado
+const frontendDistPath = path.resolve(__dirname, '..', '..', 'dist');
+app.use(express.static(frontendDistPath));
+
+// Rota catch-all para lidar com o roteamento do React (SPA)
+// Qualquer requisição que não seja para a API será direcionada para o index.html
+app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+});
 
 // Função para criar o usuário admin padrão se não existir
 const seedAdminUser = async () => {

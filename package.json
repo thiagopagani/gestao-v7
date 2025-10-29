@@ -18,7 +18,9 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "sequelize": "^6.37.7",
-    "bcryptjs": "^3.0.2"
+    "bcryptjs": "^3.0.2",
+    "path": "^0.12.7",
+    "url": "^0.11.4"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
