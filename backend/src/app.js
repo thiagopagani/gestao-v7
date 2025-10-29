@@ -1,4 +1,3 @@
-import './config/env.js'; // Garante que as variáveis de ambiente sejam carregadas primeiro
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';

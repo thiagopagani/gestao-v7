@@ -6,7 +6,7 @@ export const seedAdminUser = async () => {
     const adminExists = await User.findOne({ where: { email: 'admin@gestao.com' } });
 
     if (!adminExists) {
-      console.log('Usuário administrador não encontrado, criando...');
+      console.log('[SEED] Usuário administrador não encontrado, criando...');
       const hashedPassword = await bcrypt.hash('admin123', 10);
       await User.create({
         nome: 'Administrador',
@@ -15,9 +15,9 @@ export const seedAdminUser = async () => {
         papel: 'Admin',
         status: 'Ativo',
       });
-      console.log('Usuário administrador criado com sucesso.');
+      console.log('[SEED] Usuário administrador criado com sucesso.');
     } else {
-      console.log('Usuário administrador já existe.');
+      console.log('[SEED] Usuário administrador já existe.');
     }
   } catch (error) {
     console.error('----------------------------------------------------');
