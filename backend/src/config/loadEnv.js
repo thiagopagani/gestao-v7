@@ -5,8 +5,10 @@ import fs from 'fs';
 import { logInfo, logError } from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const envPath = path.resolve(__dirname, '..', '..', '.env');
+// __dirname aqui é backend/src/config
+const __dirname = path.dirname(__filename); 
+// Sobe dois níveis para chegar na pasta 'backend'
+const envPath = path.join(__dirname, '..', '..', '.env');
 
 logInfo(`Procurando arquivo .env em: ${envPath}`);
 
