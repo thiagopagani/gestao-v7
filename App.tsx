@@ -12,8 +12,8 @@ import Usuarios from './pages/Usuarios';
 import Login from './pages/Login';
 
 const App: React.FC = () => {
-  // Simple auth state simulation. Start as not authenticated.
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Auth state is now defaulted to true to bypass login for testing
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   const handleLogout = () => {
     setIsAuthenticated(false);
