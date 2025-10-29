@@ -30,19 +30,24 @@ const Empresas: React.FC = () => {
     try {
       const response = await fetch(`${API_URL}?${params.toString()}`);
       if (!response.ok) {
+        // Se a resposta não for OK, pode ser um erro de servidor (500, 503, etc.)
+        if (response.status === 503) {
+          throw new Error('Serviço indisponível (Service Unavailable). A API pode estar offline.');
+        }
         let errorData;
         try {
           errorData = await response.json();
         } catch(e) {
-          errorData = { message: response.statusText };
+          errorData = { message: `Erro ${response.status}: ${response.statusText}` };
         }
         throw new Error(errorData.message || 'Falha ao buscar dados das empresas.');
       }
       const data = await response.json();
       setEmpresas(data);
     } catch (err: any) {
-       if (err.message.includes("Unexpected token '<'")) {
-        setError("Erro de comunicação com a API. Verifique se o servidor está no ar.");
+       // Captura erros de rede (backend fora do ar) ou JSON inválido (página de erro do servidor)
+       if (err instanceof TypeError) { // NetworkError
+        setError("Erro de comunicação com o servidor. A API pode estar indisponível.");
       } else {
         setError(err.message);
       }
@@ -201,7 +206,7 @@ const Empresas: React.FC = () => {
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {loading ? (
                     <tr><td colSpan={5} className="text-center py-4">Carregando...</td></tr>
-                  ) : empresas.length === 0 ? (
+                  ) : empresas.length === 0 && !error ? (
                     <tr><td colSpan={5} className="text-center py-4 text-gray-500">Nenhuma empresa encontrada.</td></tr>
                   ) : empresas.map((empresa) => (
                     <tr key={empresa.id}>

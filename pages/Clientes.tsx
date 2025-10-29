@@ -39,7 +39,11 @@ const Clientes: React.FC = () => {
       const data = await response.json();
       setClientes(data);
     } catch (err: any) {
-      setError(err.message);
+      if (err instanceof TypeError) { // NetworkError
+        setError("Erro de comunicação com o servidor. A API pode estar indisponível.");
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -182,6 +186,8 @@ const Clientes: React.FC = () => {
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {loading ? (
                     <tr><td colSpan={6} className="text-center py-4">Carregando...</td></tr>
+                  ) : clientes.length === 0 && !error ? (
+                    <tr><td colSpan={6} className="text-center py-4 text-gray-500">Nenhum cliente encontrado.</td></tr>
                   ) : clientes.map((cliente) => (
                     <tr key={cliente.id}>
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{cliente.nome}</td>

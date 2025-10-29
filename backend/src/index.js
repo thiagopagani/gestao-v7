@@ -95,7 +95,9 @@ const startServer = async () => {
             await sequelize.authenticate();
             console.log('Conexão com o banco de dados estabelecida com sucesso.');
 
-            await sequelize.sync(); 
+            // Sincroniza o banco de dados. { alter: true } ajusta as tabelas para corresponder aos modelos.
+            // Isso evita a necessidade de apagar o banco de dados manualmente após alterações nos modelos.
+            await sequelize.sync({ alter: true }); 
             console.log('Banco de dados sincronizado.');
 
             await seedAdminUser();

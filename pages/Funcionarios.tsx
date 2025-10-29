@@ -40,7 +40,11 @@ const Funcionarios: React.FC = () => {
       const data = await response.json();
       setFuncionarios(data);
     } catch (err: any) {
-      setError(err.message);
+      if (err instanceof TypeError) { // NetworkError
+        setError("Erro de comunicação com o servidor. A API pode estar indisponível.");
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -194,7 +198,7 @@ const Funcionarios: React.FC = () => {
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {loading ? (
                     <tr><td colSpan={6} className="text-center py-4">Carregando...</td></tr>
-                  ) : funcionarios.length === 0 ? (
+                  ) : funcionarios.length === 0 && !error ? (
                     <tr><td colSpan={6} className="text-center py-4 text-gray-500">Nenhum funcionário encontrado.</td></tr>
                   ) : funcionarios.map((func) => (
                     <tr key={func.id}>
