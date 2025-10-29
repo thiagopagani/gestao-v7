@@ -1,4 +1,4 @@
-import './config/loadEnv.js'; // IMPORTANTE: Carrega as variáveis de ambiente primeiro
+import './config/loadEnv.js'; // IMPORTANTE: Carrega e VALIDA as variáveis de ambiente primeiro
 
 import express from 'express';
 import cors from 'cors';
@@ -31,6 +31,11 @@ const PORT = process.env.BACKEND_PORT || 3001;
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+
+// Rota de diagnóstico (Health Check)
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date() });
+});
 
 // Rotas da API
 app.use('/api/auth', authRoutes);
@@ -83,6 +88,7 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Função de inicialização robusta com retry para o banco de dados
 const startServer = async () => {
+    console.log(`Tentando conectar ao banco de dados: Host=${process.env.DB_HOST}, Database=${process.env.DB_NAME}`);
     const maxRetries = 6;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
