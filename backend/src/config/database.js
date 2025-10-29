@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize';
 
-// Este arquivo assume que as variáveis de ambiente já foram carregadas
-// pelo 'env.js' no ponto de entrada da aplicação (`index.js`).
+// Este arquivo é agora muito mais simples. Ele assume que as variáveis
+// de ambiente já foram carregadas pelo ponto de entrada da aplicação (`index.js`).
 
 const sequelize = new Sequelize(
   process.env.DB_NAME,
@@ -10,15 +10,15 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,
     dialect: 'mariadb',
-    logging: false, // Mude para `console.log` para depurar queries SQL
+    logging: false, // Defina como `console.log` para ver as queries SQL durante o desenvolvimento
     pool: {
-      max: 5,
+      max: 10,
       min: 0,
       acquire: 30000,
       idle: 10000,
     },
     define: {
-      freezeTableName: true,
+      freezeTableName: true, // Impede que o Sequelize pluralize os nomes das tabelas
     },
   }
 );

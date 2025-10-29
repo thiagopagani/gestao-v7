@@ -15,22 +15,20 @@ import relatorioRoutes from './routes/relatorioRoutes.js';
 
 const app = express();
 
-// Middlewares de segurança e parse
+// Middlewares essenciais
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
 
 // Configuração para servir os arquivos estáticos do frontend
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const frontendDistPath = path.join(__dirname, '..', '..', 'dist');
+const frontendDistPath = path.resolve(__dirname, '..', '..', 'dist');
 
+console.log(`[STATIC] Servindo arquivos estáticos de: ${frontendDistPath}`);
 app.use(express.static(frontendDistPath));
 
-
-// Define as rotas da API
+// Rotas da API
 app.use('/api/empresas', empresaRoutes);
 app.use('/api/clientes', clienteRoutes);
 app.use('/api/funcionarios', funcionarioRoutes);
@@ -39,21 +37,19 @@ app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/relatorios', relatorioRoutes);
 
-// Rota de verificação de "saúde" da API
+// Rota de verificação de "saúde"
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'API is running' });
 });
 
-// Rota "catch-all" para servir o index.html do frontend para qualquer rota que não seja da API
+// Rota "catch-all" para o frontend (deve vir depois das rotas da API)
 app.get('*', (req, res) => {
-  // Se a requisição não for para a API, serve o frontend
   if (!req.originalUrl.startsWith('/api')) {
     res.sendFile(path.join(frontendDistPath, 'index.html'));
   } else {
     // Se for uma rota de API não encontrada, retorna 404
-    res.status(404).json({ message: 'Endpoint não encontrado.' });
+    res.status(404).json({ message: `Endpoint não encontrado: ${req.method} ${req.originalUrl}` });
   }
 });
-
 
 export default app;
