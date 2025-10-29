@@ -47,13 +47,10 @@ const frontendDistPath = path.resolve(__dirname, '..', '..', 'dist');
 app.use(express.static(frontendDistPath));
 
 // Rota catch-all para lidar com o roteamento do React (SPA)
-// Qualquer requisição GET que não seja para a API e não seja um arquivo estático,
-// será direcionada para o index.html, permitindo que o React Router funcione.
 app.get('*', (req, res) => {
     if (!req.path.startsWith('/api/')) {
         res.sendFile(path.join(frontendDistPath, 'index.html'));
     } else {
-        // Se for uma rota de API não encontrada, retorna 404
         res.status(404).json({ message: 'Endpoint não encontrado.' });
     }
 });
@@ -81,42 +78,37 @@ const seedAdminUser = async () => {
     }
 };
 
-// Função de inicialização com retry para o banco de dados
+// Função de utilidade para criar um atraso (delay)
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Função de inicialização robusta com retry para o banco de dados
 const startServer = async () => {
     const maxRetries = 6;
-    let currentRetry = 1;
-
-    const connectWithRetry = async () => {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-            // Apenas autentica a conexão. É a prática mais segura para produção.
             await sequelize.authenticate();
             console.log('Conexão com o banco de dados estabelecida com sucesso.');
 
-            // Sincroniza o banco de dados, mas de forma segura, sem alterar ou forçar.
-            // Isso garante que as tabelas sejam criadas se não existirem, mas não mexe nelas depois.
             await sequelize.sync(); 
             console.log('Banco de dados sincronizado.');
 
-            // Cria o usuário admin padrão após a sincronização
             await seedAdminUser();
 
             app.listen(PORT, () => {
                 console.log(`Servidor rodando na porta ${PORT}`);
             });
-
+            
+            return; // Sai da função se tudo ocorreu bem
         } catch (error) {
-            console.error(`Falha ao conectar ou sincronizar o banco de dados (tentativa ${currentRetry}):`, error.message);
-            if (currentRetry < maxRetries) {
-                currentRetry++;
-                console.log(`Tentando novamente em 5 segundos...`);
-                setTimeout(connectWithRetry, 5000);
+            console.error(`Falha ao conectar ou sincronizar o banco de dados (tentativa ${attempt}/${maxRetries}):`, error.message);
+            if (attempt < maxRetries) {
+                console.log('Tentando novamente em 5 segundos...');
+                await delay(5000);
             } else {
                 console.error('Número máximo de tentativas de conexão com o banco de dados excedido. A API não será iniciada.');
             }
         }
-    };
-
-    await connectWithRetry();
+    }
 };
 
 startServer();
